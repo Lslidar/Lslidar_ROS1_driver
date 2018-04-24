@@ -1,0 +1,22 @@
+<package>
+
+  <name>lslidar_c16</name>
+  <version>1.2.0</version>
+  <description>
+    Basic ROS support for the Leishen C16 LIDARs.
+  </description>
+  <maintainer email="jishu@lslidar.com">leo</maintainer>
+  <author>leo</author>
+  <license>GNU General Public License V3.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>lslidar_c16_driver</run_depend>
+  <run_depend>lslidar_c16_msgs</run_depend>
+  <run_depend>lslidar_c16_decoder</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>

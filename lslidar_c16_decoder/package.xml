@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="2">
+
+  <name>lslidar_c16_decoder</name>
+  <version>1.2.0</version>
+  <description>
+    Point cloud conversions for Leishen C16 LIDARs.
+  </description>
+  <maintainer email="jishu@lslidar.com">leo</maintainer>
+  <author>leo</author>
+  <license>GNC General Public License V3.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>pluginlib</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+
+  <depend>pcl_ros</depend>
+  <depend>pcl_conversions</depend>
+  <depend>libpcl-all-dev</depend>
+  <depend>libpcl-all</depend>
+
+  <depend>lslidar_c16_msgs</depend>
+
+</package>
