@@ -199,7 +199,7 @@ private:
     double frequency;
     bool publish_point_cloud;
     bool publish_channels;
-    
+    bool apollo_interface;
     double cos_azimuth_table[6300];
     double sin_azimuth_table[6300];
 

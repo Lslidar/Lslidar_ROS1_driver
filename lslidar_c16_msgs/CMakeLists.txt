@@ -15,6 +15,7 @@ add_message_files(
   LslidarC16Point.msg
   LslidarC16Scan.msg
   LslidarC16Sweep.msg
+  LslidarC16ScanUnified.msg
 )
 generate_messages(DEPENDENCIES std_msgs sensor_msgs)
 

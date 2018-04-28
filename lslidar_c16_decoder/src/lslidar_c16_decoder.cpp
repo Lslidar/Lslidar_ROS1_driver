@@ -48,10 +48,14 @@ bool LslidarC16Decoder::loadParameters() {
     pnh.param<double>("frequency", frequency, 20.0);
     pnh.param<bool>("publish_point_cloud", publish_point_cloud, true);
     pnh.param<bool>("publish_channels", publish_channels, true);
+    pnh.param<bool>("apollo_interface", apollo_interface, false);
     pnh.param<string>("fixed_frame_id", fixed_frame_id, "map");
     pnh.param<string>("child_frame_id", child_frame_id, "lslidar");
 
     angle_base = M_PI*2 / point_num;
+
+    if (apollo_interface)
+        ROS_WARN("This is apollo interface mode");
     return true;
 }
 

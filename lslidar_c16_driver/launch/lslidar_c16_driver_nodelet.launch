@@ -10,7 +10,7 @@
     args="load lslidar_c16_driver/LslidarC16DriverNodelet
     lslidar_c16_nodelet_manager" >
     <param name="frame_id" value="lslidar"/>
-    <param name="device_ip" value="192.168.1.222"/>
+    <param name="device_ip" value="192.168.1.200"/>
   </node>
 
 </launch>

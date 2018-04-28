@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   pcl_conversions
   lslidar_c16_msgs
+  nodelet
 )
 find_package(Boost REQUIRED)
 
@@ -18,7 +19,7 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES lslidar_c16_decoder
   CATKIN_DEPENDS
-    roscpp sensor_msgs pluginlib
+    roscpp sensor_msgs pluginlib nodelet
     pcl_ros pcl_conversions
     lslidar_c16_msgs
   DEPENDS
@@ -60,12 +61,26 @@ add_dependencies(lslidar_c16_decoder_node
   ${catkin_EXPORTED_TARGETS}
 )
 
-install(TARGETS lslidar_c16_decoder_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# Lslidar N301 Decoder nodelet
+add_library(lslidar_c16_decoder_nodelet
+  src/lslidar_c16_decoder_nodelet.cpp
+)
+target_link_libraries(lslidar_c16_decoder_nodelet
+  lslidar_c16_decoder
+  ${catkin_LIBRARIES}
+)
+add_dependencies(lslidar_c16_decoder_nodelet
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
 )
 
-install(DIRECTORY launch
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+
+# install(TARGETS lslidar_c16_decoder_node
+#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+# install(DIRECTORY launch
+#         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+# )
