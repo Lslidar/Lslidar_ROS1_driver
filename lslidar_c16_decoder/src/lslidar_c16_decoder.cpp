@@ -113,11 +113,11 @@ bool LslidarC16Decoder::checkPacketValidity(const RawPacket* packet) {
     return true;
 }
 
+
 void LslidarC16Decoder::publishPointCloud() {
-    pcl::PointCloud<pcl::PointXYZI>::Ptr point_cloud(
-                new pcl::PointCloud<pcl::PointXYZI>());
-    point_cloud->header.stamp =
-            pcl_conversions::toPCL(sweep_data->header).stamp;
+    VPointCloud::Ptr point_cloud(new VPointCloud());
+
+            // pcl_conversions::toPCL(sweep_data->header).stamp;
     point_cloud->header.frame_id = child_frame_id;
     point_cloud->height = 1;
 
@@ -127,11 +127,13 @@ void LslidarC16Decoder::publishPointCloud() {
         // seems to be corrupted based on the received data.
         // TODO: The two end points should be removed directly
         //    in the scans.
+        double timestamp = ros::Time::now().toSec();
+        point_cloud->header.stamp = static_cast<uint64_t>(timestamp * 1e6);
         if (scan.points.size() == 0) continue;
         size_t j;
+        VPoint point;
         for (j = 1; j < scan.points.size()-1; ++j) {
-
-            pcl::PointXYZI point;
+            point.timestamp = timestamp;
             point.x = scan.points[j].x;
             point.y = scan.points[j].y;
             point.z = scan.points[j].z;
@@ -139,17 +141,49 @@ void LslidarC16Decoder::publishPointCloud() {
             point_cloud->points.push_back(point);
             ++point_cloud->width;
         }
-
     }
-
-    //  	if(point_cloud->width > 2000)
     {
         point_cloud_pub.publish(point_cloud);
     }
-
-
     return;
 }
+
+// void LslidarC16Decoder::publishPointCloud() {
+//     pcl::PointCloud<pcl::PointXYZIT>::Ptr point_cloud(
+//                 new pcl::PointCloud<pcl::PointXYZIT>());
+//     point_cloud->header.stamp =
+//             pcl_conversions::toPCL(sweep_data->header).stamp;
+//     point_cloud->header.frame_id = child_frame_id;
+//     point_cloud->height = 1;
+
+//     for (size_t i = 0; i < 16; ++i) {
+//         const lslidar_c16_msgs::LslidarC16Scan& scan = sweep_data->scans[i];
+//         // The first and last point in each scan is ignored, which
+//         // seems to be corrupted based on the received data.
+//         // TODO: The two end points should be removed directly
+//         //    in the scans.
+//         if (scan.points.size() == 0) continue;
+//         size_t j;
+//         for (j = 1; j < scan.points.size()-1; ++j) {
+
+//             pcl::PointXYZIT point;
+//             point.x = scan.points[j].x;
+//             point.y = scan.points[j].y;
+//             point.z = scan.points[j].z;
+//             point.intensity = scan.points[j].intensity;
+//             point.timestamp = ros::Time::now();
+//             point_cloud->points.push_back(point);
+//             ++point_cloud->width;
+//         }
+
+//     }
+
+//     //  	if(point_cloud->width > 2000)
+//     {
+//         point_cloud_pub.publish(point_cloud);
+//     }
+//     return;
+// }
 
 void LslidarC16Decoder::publishChannelScan()
 {

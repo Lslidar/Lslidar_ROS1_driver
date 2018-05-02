@@ -78,7 +78,6 @@ bool LslidarC16Driver::createRosIO() {
     // Output
     packet_pub = nh.advertise<lslidar_c16_msgs::LslidarC16Packet>(
                 "lslidar_packet", 100);
-
     return true;
 }
 

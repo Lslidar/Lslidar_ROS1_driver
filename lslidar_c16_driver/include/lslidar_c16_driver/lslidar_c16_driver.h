@@ -30,6 +30,7 @@
 #include <diagnostic_updater/publisher.h>
 
 #include <lslidar_c16_msgs/LslidarC16Packet.h>
+#include <lslidar_c16_msgs/LslidarC16ScanUnified.h>
 
 namespace lslidar_c16_driver {
 
@@ -66,7 +67,7 @@ private:
     ros::NodeHandle pnh;
 
     std::string frame_id;
-    ros::Publisher packet_pub;
+    ros::Publisher packet_pub;    
 
     // Diagnostics updater
     diagnostic_updater::Updater diagnostics;
