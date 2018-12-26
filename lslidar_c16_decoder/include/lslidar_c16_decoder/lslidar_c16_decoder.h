@@ -206,6 +206,7 @@ private:
     double angle_disable_max;
     double frequency;
     bool publish_point_cloud;
+    bool use_gps_ts;
     bool publish_channels;
     bool apollo_interface;
     double cos_azimuth_table[6300];

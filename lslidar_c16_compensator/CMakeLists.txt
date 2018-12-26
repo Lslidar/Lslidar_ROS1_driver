@@ -49,13 +49,13 @@ link_directories(
 )
 
 # Lslidar C16 compensator node
-add_library(lslidar_compensator_node src/compensator_node.cpp src/compensator.cpp)
-target_link_libraries(lslidar_compensator_node 
+add_library(lslidar_c16_compensator_node src/compensator_node.cpp src/compensator.cpp)
+target_link_libraries(lslidar_c16_compensator_node 
 	${catkin_LIBRARIES}
     ${PCL_LIBRARIES})
 
-add_library(lslidar_compensator_nodelet src/compensator_nodelet.cpp src/compensator.cpp)
-target_link_libraries(lslidar_compensator_nodelet
+add_library(lslidar_c16_compensator_nodelet src/compensator_nodelet.cpp src/compensator.cpp)
+target_link_libraries(lslidar_c16_compensator_nodelet
 	${catkin_LIBRARIES}
     ${PCL_LIBRARIES})
 

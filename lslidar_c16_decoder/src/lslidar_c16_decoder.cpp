@@ -52,6 +52,8 @@ bool LslidarC16Decoder::loadParameters() {
     pnh.param<string>("fixed_frame_id", fixed_frame_id, "map");
     pnh.param<string>("child_frame_id", child_frame_id, "lslidar");
 
+    pnh.param<bool>("use_gps_ts", use_gps_ts, false);
+    ROS_WARN("Using GPS timestamp or not %d", use_gps_ts);
     angle_base = M_PI*2 / point_num;
 
     if (apollo_interface)
@@ -128,7 +130,13 @@ void LslidarC16Decoder::publishPointCloud() {
         // TODO: The two end points should be removed directly
         //    in the scans.
         double timestamp = ros::Time::now().toSec();
-        point_cloud->header.stamp = static_cast<uint64_t>(timestamp * 1e6);
+        if (use_gps_ts){
+            point_cloud->header.stamp = static_cast<uint64_t>(sweep_start_time * 1e6);
+        }
+        else{
+            point_cloud->header.stamp = static_cast<uint64_t>(timestamp * 1e6);
+        }
+
         if (scan.points.size() == 0) continue;
         size_t j;
         VPoint point;
@@ -516,7 +524,14 @@ void LslidarC16Decoder::packetCallback(
         //	ROS_WARN("A new sweep begins");
         // Publish the last revolution
         sweep_data->header.frame_id = "sweep";
-        sweep_data->header.stamp = ros::Time(sweep_start_time);
+
+        if (use_gps_ts){
+            sweep_data->header.stamp = ros::Time(sweep_start_time);
+        }
+        else{
+            sweep_data->header.stamp = ros::Time::now();
+        }
+
 
         sweep_pub.publish(sweep_data);
 
