@@ -109,6 +109,9 @@ bool LslidarC16Driver::openUDPPort() {
 }
 
 bool LslidarC16Driver::initialize() {
+
+    this->initTimeStamp();
+
     if (!loadParameters()) {
         ROS_ERROR("Cannot load all required ROS parameters...");
         return false;
@@ -213,13 +216,13 @@ int LslidarC16Driver::getPacket(
 
 
     }
-
+    this->getFPGA_GPSTimeStamp(packet);
 
     // Average the times at which we begin and end reading.  Use that to
     // estimate when the scan occurred.
     double time2 = ros::Time::now().toSec();
-    packet->stamp = ros::Time((time2 + time1) / 2.0);
-
+//    packet->stamp = ros::Time((time2 + time1) / 2.0);
+    packet->stamp = this->timeStamp;
     return 0;
 }
 
@@ -259,6 +262,85 @@ bool LslidarC16Driver::polling()
     diagnostics.update();
 
     return true;
+}
+
+void LslidarC16Driver::initTimeStamp(void)
+{
+    int i;
+
+    for(i = 0;i < 10;i ++)
+    {
+        this->packetTimeStamp[i] = 0;
+    }
+    this->pointcloudTimeStamp = 0;
+
+    this->timeStamp = ros::Time(0.0);
+}
+
+void LslidarC16Driver::getFPGA_GPSTimeStamp(lslidar_c16_msgs::LslidarC16PacketPtr &packet)
+{
+    unsigned char head2[] = {packet->data[0],packet->data[1],packet->data[2],packet->data[3]};
+
+    if(head2[0] == 0xA5 && head2[1] == 0xFF)
+    {
+        if(head2[2] == 0x00 && head2[3] == 0x5A)
+        {
+            this->packetTimeStamp[4] = packet->data[41];
+            this->packetTimeStamp[5] = packet->data[40];
+            this->packetTimeStamp[6] = packet->data[39];
+            this->packetTimeStamp[7] = packet->data[38];
+            this->packetTimeStamp[8] = packet->data[37];
+            this->packetTimeStamp[9] = packet->data[36];
+
+            cur_time.tm_sec = this->packetTimeStamp[4];
+            cur_time.tm_min = this->packetTimeStamp[5];
+            cur_time.tm_hour = this->packetTimeStamp[6];
+            cur_time.tm_mday = this->packetTimeStamp[7];
+            cur_time.tm_mon = this->packetTimeStamp[8]-1;
+            cur_time.tm_year = this->packetTimeStamp[9]+2000-1900;
+            this->pointcloudTimeStamp = static_cast<uint64_t>(timegm(&cur_time));
+
+            if (GPSCountingTS != this->pointcloudTimeStamp)
+            {
+                cnt_gps_ts = 0;
+                GPSCountingTS = this->pointcloudTimeStamp;
+            }
+            else if (cnt_gps_ts == 3)
+            {
+                GPSStableTS = GPSCountingTS;
+            }
+            else
+            {
+                cnt_gps_ts ++;
+            }
+//            ROS_DEBUG("GPS: y:%d m:%d d:%d h:%d m:%d s:%d",
+//                      cur_time.tm_year,cur_time.tm_mon,cur_time.tm_mday,cur_time.tm_hour,cur_time.tm_min,cur_time.tm_sec);
+        }
+    }
+    else if(head2[0] == 0xFF && head2[1] == 0xEE)
+    {
+        uint64_t packet_timestamp;
+        packet_timestamp = (packet->data[1200]  +
+                            packet->data[1201] * pow(2, 8) +
+                            packet->data[1202] * pow(2, 16) +
+                            packet->data[1203] * pow(2, 24)) * 1e3;
+
+
+        if ((last_FPGA_ts - packet_timestamp) > 0)
+        {
+            GPS_ts = GPSStableTS;
+
+            ROS_DEBUG("This is step time, using new GPS ts %lu", GPS_ts);
+        }
+
+        last_FPGA_ts = packet_timestamp;
+        // timeStamp = ros::Time(this->pointcloudTimeStamp+total_us/10e5);
+
+        timeStamp = ros::Time(GPS_ts, packet_timestamp);
+//        ROS_DEBUG("ROS TS: %f, GPS: y:%d m:%d d:%d h:%d m:%d s:%d; FPGA: us:%lu",
+//                  timeStamp.toSec(), GPS_ts, packet_timestamp);
+
+    }
 }
 
 } // namespace lslidar_driver

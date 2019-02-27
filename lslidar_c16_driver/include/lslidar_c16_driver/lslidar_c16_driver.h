@@ -46,6 +46,9 @@ public:
     bool initialize();
     bool polling();
 
+    void initTimeStamp(void);
+    void getFPGA_GPSTimeStamp(lslidar_c16_msgs::LslidarC16PacketPtr &packet);
+
     typedef boost::shared_ptr<LslidarC16Driver> LslidarC16DriverPtr;
     typedef boost::shared_ptr<const LslidarC16Driver> LslidarC16DriverConstPtr;
 
@@ -61,7 +64,8 @@ private:
     in_addr device_ip;
     int UDP_PORT_NUMBER;
     int socket_id;
-
+    int cnt_gps_ts;
+    bool use_gps_;
     // ROS related variables
     ros::NodeHandle nh;
     ros::NodeHandle pnh;
@@ -74,6 +78,17 @@ private:
     boost::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic;
     double diag_min_freq;
     double diag_max_freq;
+
+    uint64_t pointcloudTimeStamp;
+    uint64_t GPSStableTS;
+    uint64_t GPSCountingTS;
+    uint64_t last_FPGA_ts;
+    uint64_t GPS_ts;
+    unsigned char packetTimeStamp[10];
+    struct tm cur_time;
+    unsigned short int us;
+    unsigned short int ms;
+    ros::Time timeStamp;
 };
 
 typedef LslidarC16Driver::LslidarC16DriverPtr LslidarC16DriverPtr;

@@ -6,8 +6,8 @@
   <description>
     Point cloud conversions for Leishen C16 LIDARs.
   </description>
-  <maintainer email="jishu@lslidar.com">leo</maintainer>
-  <author>leo</author>
+  <maintainer email="yutongyan@lslidar.com">Yutong</maintainer>
+  <author>Yutong</author>
   <license>GNC General Public License V3.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>
