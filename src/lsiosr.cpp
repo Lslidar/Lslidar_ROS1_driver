@@ -5,6 +5,7 @@
 @brief:
 @version:       date:       author:     comments:
 @v1.0           18-8-21     fu          new
+@v1.5           19-04-18     tongsky    Add flushinput function
 *******************************************************/
 #include "ls01b_v2/lsiosr.h"
 
@@ -121,6 +122,10 @@ int LSIOSR::setOpt(int nBits, uint8_t nEvent, int nStop)
   }
 
   return 0;
+}
+
+void LSIOSR::flushinput() {
+  tcflush(fd_, TCIFLUSH);
 }
 
 /* 从串口中读取数据 */

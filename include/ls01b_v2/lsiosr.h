@@ -55,6 +55,9 @@ public:
   /* 向串口传数据 */
   int send(const char* buffer, int length, int timeout = 30);
 
+  /* Empty serial port input buffer */
+  void flushinput();
+
   /* 串口初始化 */
   int init();
 

@@ -5,6 +5,8 @@
 @brief:
 @version:       date:       author:     comments:
 @v1.0           18-8-21     fu          new
+@v1.5           19-4-16     tongsky     Add service to change resolution online
+@v1.5           19-4-18     tongsky     Fix bug when switching resolution
 *******************************************************/
 #include "ls01b_v2/ls01b.h"
 #include <stdio.h>
@@ -173,7 +175,9 @@ int LS01B::setScanMode(bool is_continuous)
     scan_health_ = -1;
     return rtn;
   }
+  serial_->flushinput();
   is_start_ = true;
+  usleep(200000);
   return rtn;
 }
 
@@ -249,6 +253,8 @@ int LS01B::setMotorSpeed(int rpm)
 int LS01B::setResolution(double resolution)
 {
   printf("setResolution resolution = %f\n", resolution);
+
+  is_start_ = false;
   char data[4];
   data[0] = 0xa5;
   data[1] = 0x30;
@@ -285,8 +291,7 @@ int LS01B::setResolution(double resolution)
     scan_health_ = -1;
     return rtn;
   }
-  is_start_ = false;
-
+  serial_->flushinput();
   return rtn;
 }
 
@@ -294,6 +299,12 @@ bool LS01B::resServerCallback(ls01b_v2::resolution::Request &req,
                    ls01b_v2::resolution::Response &res)
 {
   double resolution = req.resolution.data;
+  if (resolution_ == resolution)
+  {
+      ROS_INFO("The same resolution, no need to switch");
+      res.status = true;
+      return true;
+  }
   if ((resolution == 0.25) | (resolution == 0.5)  | (resolution == 1.0))
   {
     ROS_WARN("User want to switch to resolution %1.2f degree", resolution);
@@ -303,12 +314,15 @@ bool LS01B::resServerCallback(ls01b_v2::resolution::Request &req,
     res.status = false;
     return true;
   }
-  stopRecvData();   // stop sending data
-  usleep(100);
+//  stopRecvData();   // stop sending data
+//  usleep(100);
   setResolution(resolution);
-  usleep(100);
+  usleep(100000);
+  setResolution(resolution);
+  usleep(100000);
   setScanMode(true);
   res.status = true;
+  serial_->flushinput();
   return true;
 }
 void LS01B::recvThread()
@@ -323,12 +337,12 @@ void LS01B::recvThread()
     packet_bytes = NULL;
     // printf("new char [data_len_] error \n");
   }
-
+  int cnt_switch_res_failed = 0;
   boost::posix_time::ptime t1,t2;
   t1 = boost::posix_time::microsec_clock::universal_time();
   while(!is_shutdown_&&ros::ok()){
     while(!is_start_){
-      usleep(300000);
+      usleep(100000);
     }
 
     bool is_health = this->isHealth();
@@ -343,7 +357,7 @@ void LS01B::recvThread()
     int count = serial_->read(&header[start_count], 1);
     if (count<=0)
     {
-      // printf("read header[%d] error\n", start_count);
+        ROS_DEBUG("read header[%d] error\n", start_count);
       start_count = 0;
       scan_health_ = -3;
       continue;
@@ -383,7 +397,7 @@ void LS01B::recvThread()
         int count = serial_->read(&header[start_count], 4);
         if (count != 4)
         {
-          // printf("read header error\n");
+           ROS_DEBUG("read header error\n");
           start_count = 0;
           scan_health_ = -3;
           continue;
@@ -392,14 +406,35 @@ void LS01B::recvThread()
         rpm_ = ((header[2]&0x7f) << 8) + (header[3]&0xff);
         int flag = ((header[2] & 0x80) == 0) ? 0 : 1;
         int angular_resolution = (header[4]&0xff) >> 1;
-        int start_angle = ((header[4] & 0x01) << 8) + (header[5]&0xff);
 
+        int start_angle = ((header[4] & 0x01) << 8) + (header[5]&0xff);
+        if (angular_resolution/100.0 != resolution_)
+        {
+          ROS_WARN("angular resolution is not ok yet current res %d", angular_resolution);
+          usleep(100000);
+          cnt_switch_res_failed++;
+          if (cnt_switch_res_failed >= 10)
+          {
+              double tmp_res = resolution_;
+              ROS_FATAL("Laser switch resolution failed. Fallback");
+              setResolution(angular_resolution/100.0);
+              usleep(100000);
+              setResolution(tmp_res);
+              usleep(100000);
+              setScanMode(true);
+              usleep(100000);
+              cnt_switch_res_failed =0;
+          }
+          start_count = 0;
+          continue;
+        }
         count = serial_->read(packet_bytes, data_len_);
         if (count != data_len_)
         {
-          // printf("read %d packet error\n", data_len_);
+           ROS_DEBUG("read %d packet error. Only read %d data", data_len_, count);
           start_count = 0;
-          scan_health_ = -3;
+          if (count == 0)
+            scan_health_ = -3;
           continue;
         }
 
