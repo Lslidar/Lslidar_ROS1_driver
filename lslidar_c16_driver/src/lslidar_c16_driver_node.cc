@@ -25,6 +25,7 @@ int main(int argc, char** argv)
     ros::NodeHandle private_nh("~");
 
     // start the driver
+    ROS_INFO("namespace is %s", private_nh.getNamespace().c_str());
     lslidar_c16_driver::LslidarC16Driver driver(node, private_nh);
   if (!driver.initialize()) {
     ROS_ERROR("Cannot initialize lslidar driver...");

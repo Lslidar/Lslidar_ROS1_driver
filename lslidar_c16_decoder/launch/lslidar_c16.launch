@@ -12,6 +12,8 @@
     <param name="channel_num" value="8"/>
     <param name="angle_disable_min" value="0"/>
     <param name="angle_disable_max" value="0"/>
+    <param name="angle3_disable_min" value="1.57"/>
+    <param name="angle3_disable_max" value="3.14"/>
     <param name="min_range" value="0.15"/>
     <param name="max_range" value="150.0"/>
     <param name="frequency" value="10.0"/>

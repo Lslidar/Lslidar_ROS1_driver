@@ -44,7 +44,15 @@ bool LslidarC16Decoder::loadParameters() {
     pnh.param<double>("max_range", max_range, 100.0);
     pnh.param<double>("angle_disable_min", angle_disable_min,-1);
     pnh.param<double>("angle_disable_max", angle_disable_max, -1);
-
+    pnh.param<double>("angle3_disable_min", angle3_disable_min, -1);
+    pnh.param<double>("angle3_disable_max", angle3_disable_max, -1);
+    double tmp_min, tmp_max;
+    ROS_WARN("discard Point cloud angle from %2.2f to %2.2f", angle3_disable_min, angle3_disable_max);
+    tmp_min = 2*M_PI - angle3_disable_max;
+    tmp_max = 2*M_PI - angle3_disable_min;
+    angle3_disable_min = tmp_min;
+    angle3_disable_max = tmp_max;
+    ROS_WARN("switch angle from %2.2f to %2.2f in left hand rule", angle3_disable_min, angle3_disable_max);
     pnh.param<double>("frequency", frequency, 20.0);
     pnh.param<bool>("publish_point_cloud", publish_point_cloud, true);
     pnh.param<bool>("publish_channels", publish_channels, true);
@@ -141,6 +149,10 @@ void LslidarC16Decoder::publishPointCloud() {
         size_t j;
         VPoint point;
         for (j = 1; j < scan.points.size()-1; ++j) {
+            if ((scan.points[j].azimuth > angle3_disable_min) and (scan.points[j].azimuth < angle3_disable_max))
+            {
+                continue;
+            }
             point.timestamp = timestamp;
             point.x = scan.points[j].x;
             point.y = scan.points[j].y;

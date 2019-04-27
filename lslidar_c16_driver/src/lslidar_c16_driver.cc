@@ -50,8 +50,10 @@ bool LslidarC16Driver::loadParameters() {
   pnh.param("frame_id", frame_id, std::string("lslidar"));
   pnh.param("device_ip", device_ip_string, std::string("192.168.1.222"));
   pnh.param<int>("device_port", UDP_PORT_NUMBER, 2368);
+  pnh.param("group_ip", group_ip_string, std::string("234.2.3.2"));
   inet_aton(device_ip_string.c_str(), &device_ip);
   ROS_INFO_STREAM("Opening UDP socket: address " << device_ip_string);
+  ROS_INFO_STREAM("Opening UDP socket: group_address " << group_ip_string);
   ROS_INFO_STREAM("Opening UDP socket: port " << UDP_PORT_NUMBER);
   return true;
 }
@@ -99,7 +101,16 @@ bool LslidarC16Driver::openUDPPort() {
         perror("bind");                 // TODO: ROS_ERROR errno
         return false;
     }
-
+    //add multicast
+    ip_mreq groupcast;
+    groupcast.imr_interface.s_addr=INADDR_ANY;
+    groupcast.imr_multiaddr.s_addr=inet_addr(group_ip_string.c_str());
+    
+    if(setsockopt(socket_id,IPPROTO_IP,IP_ADD_MEMBERSHIP,(char*)&groupcast,sizeof(groupcast))<0) {
+        perror("set multicast error");
+        close(socket_id);
+        return false;
+    }
     if (fcntl(socket_id, F_SETFL, O_NONBLOCK|FASYNC) < 0) {
         perror("non-block");
         return false;

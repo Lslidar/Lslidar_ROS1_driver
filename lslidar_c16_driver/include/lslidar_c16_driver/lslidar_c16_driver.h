@@ -61,6 +61,7 @@ private:
 
     // Ethernet relate variables
     std::string device_ip_string;
+    std::string group_ip_string;
     in_addr device_ip;
     int UDP_PORT_NUMBER;
     int socket_id;

@@ -3,6 +3,11 @@
 ## version track
 Author: Yutong
 
+### ver1.2 Yutong
+1. Add group multicast function
+2. Add truncate 3D angle area data
+
+
 ### ver1.1  Yutong
 Using new message type to distinguish different channel data
 topic name: scan_channel
