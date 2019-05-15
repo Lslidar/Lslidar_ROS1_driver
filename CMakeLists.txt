@@ -6,6 +6,7 @@ set( CMAKE_CXX_FLAGS "-std=c++11 -O3" )
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  std_srvs
   sensor_msgs
   message_generation
 )
@@ -15,7 +16,7 @@ add_service_files(FILES resolution.srv)
 
 generate_messages(DEPENDENCIES std_msgs)
 
-catkin_package(CATKIN_DEPENDS roscpp
+catkin_package(CATKIN_DEPENDS roscpp std_srvs
 rospy std_msgs message_runtime)
 include_directories(include)
 include_directories(${catkin_INCLUDE_DIRS})

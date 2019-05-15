@@ -16,6 +16,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include "ls01b_v2/lsiosr.h"
 #include "ls01b_v2/resolution.h"
+#include <std_srvs/SetBool.h>
 
 namespace ls {
 
@@ -115,6 +116,9 @@ public:
     bool resServerCallback(ls01b_v2::resolution::Request &req,
                    ls01b_v2::resolution::Response &res);
 
+    bool startCallback(std_srvs::SetBoolRequest &req,
+                   std_srvs::SetBoolResponse &res);
+
   private:
     void initParam();
     void recvThread();
@@ -134,10 +138,12 @@ public:
     boost::mutex mutex_;
     boost::condition_variable pubscan_cond_;
     ros::ServiceServer changeRes_client;
+    ros::ServiceServer start_client;
 
     bool is_shutdown_;    // shutdown recvthread
     bool is_start_;       // begin to read data from lidar
     bool use_angle_;
+    bool start_switch;
     
     int scan_health_; // 0 OK
     double resolution_;
@@ -154,9 +160,14 @@ public:
     int baud_rate_;
     std::string scan_topic_;
     std::string frame_id_;
+
     double robot_radius_;
+    int truncated_mode_;
+    std::vector<int> disable_angle_max_range_;
+    std::vector<int> disable_angle_min_range_;
     double center_x_;
     double center_y_;
+
     double rmp_;
     double angle_disable_min_0;
     double angle_disable_max_0;

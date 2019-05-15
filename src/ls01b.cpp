@@ -7,6 +7,7 @@
 @v1.0           18-8-21     fu          new
 @v1.5           19-4-16     tongsky     Add service to change resolution online
 @v1.5           19-4-18     tongsky     Fix bug when switching resolution
+@v2.0           19-05-15    tongsky     Add service to start and stop laser; Modify truncated laser data behavior in a smart way
 *******************************************************/
 #include "ls01b_v2/ls01b.h"
 #include <stdio.h>
@@ -26,6 +27,7 @@ LS01B::LS01B()
   serial_ = LSIOSR::instance(serial_port_, baud_rate_);
   serial_->init();
   changeRes_client = n_.advertiseService("resolution_control", &LS01B::resServerCallback, this);
+  start_client = n_.advertiseService("start_control", &LS01B::startCallback, this);
   recv_thread_ = new boost::thread(boost::bind(&LS01B::recvThread, this));
   pubscan_thread_ = new boost::thread(boost::bind(&LS01B::pubScanThread, this));
 }
@@ -63,16 +65,6 @@ void LS01B::initParam()
   nh.param("serial_port", serial_port_, port);
   nh.param("baud_rate", baud_rate_, 460800);
   nh.param("angle_resolution", resolution_, 1.0);
-  nh.param("angle_disable_min_0", angle_disable_min_0, -1.0);
-  nh.param("angle_disable_max_0", angle_disable_max_0, -1.0);
-  nh.param("angle_disable_min_1", angle_disable_min_1, -1.0);
-  nh.param("angle_disable_max_1", angle_disable_max_1, -1.0);
-  nh.param("angle_disable_min_2", angle_disable_min_2, -1.0);
-  nh.param("angle_disable_max_2", angle_disable_max_2, -1.0);
-  nh.param("angle_disable_min_3", angle_disable_min_3, -1.0);
-  nh.param("angle_disable_max_3", angle_disable_max_3, -1.0);
-  nh.param("angle_disable_min_4", angle_disable_min_4, -1.0);
-  nh.param("angle_disable_max_4", angle_disable_max_4, -1.0);
   nh.param("robot_radius", robot_radius_, 0.2);
   nh.param("center_x", center_x_, 0.0);
   nh.param("center_y", center_y_, 0.0);
@@ -82,10 +74,35 @@ void LS01B::initParam()
   is_shutdown_ = false;
   is_start_ = false;
   use_angle_ = true;
+  start_switch = true;
 
   data_len_ = 180;
   points_size_ = 360 / resolution_;
   scan_points_.resize(points_size_);
+
+  // different method to discard laser data
+  int disable_tolerance;
+  nh.param<int>("disable_tolerance", disable_tolerance, 5);
+  nh.param<int>("truncated_mode", truncated_mode_, 0);
+  std::vector<int> disable_angle_min_range, disable_angle_max_range, disable_angle_range_default;
+  nh.param<std::vector<int>>("disable_min", disable_angle_min_range, disable_angle_range_default);
+  nh.param<std::vector<int>>("disable_max", disable_angle_max_range, disable_angle_range_default);
+  for(unsigned i=0; i < disable_angle_min_range.size(); i++)
+  {
+      ROS_INFO("truncated angle min is %d", disable_angle_min_range[i]);
+      ROS_INFO("truncated angle max is %d", disable_angle_max_range[i]);
+      disable_angle_min_range_.push_back(disable_angle_min_range[i]);
+      disable_angle_max_range_.push_back(disable_angle_max_range[i]);
+  }
+
+  if (truncated_mode_ == 1)
+  {
+      ROS_INFO("truncated mode is specific angle ranges");
+  }
+  else if (truncated_mode_ == 2)
+      ROS_INFO("truncated mode is radius limits");
+  else
+      ROS_INFO("truncated mode is disable");
 }
 
 bool LS01B::isHealth()
@@ -133,7 +150,7 @@ int LS01B::startScan()
     scan_health_ = -1;
     return rtn;
   }
-
+  start_switch = true;
   return rtn;
 }
 
@@ -151,6 +168,7 @@ int LS01B::stopScan()
     return rtn;
   }
   is_start_ = false;
+  start_switch = false;
   return rtn;
 }
 
@@ -295,6 +313,42 @@ int LS01B::setResolution(double resolution)
   return rtn;
 }
 
+bool LS01B::startCallback(std_srvs::SetBoolRequest &req, std_srvs::SetBoolResponse &res)
+{
+  bool cmd = req.data;
+  if (cmd == start_switch)
+  {
+    res.success = false;
+    if (cmd)
+    {
+      ROS_INFO("laser already start");
+      res.message = "laser already start";
+    }
+    else
+    {
+      ROS_INFO("laser already stop");
+      res.message = "laser already stop";
+    }
+  }
+  else{
+    res.success = true;
+    if (cmd){
+      startScan();
+      usleep(100000);
+      setScanMode(true);
+      res.message = "bring up laser";
+    }
+    else
+    {
+      stopRecvData();
+      usleep(100000);
+      stopScan();
+      res.message = "shutdown laser";
+    }
+  }
+  return true;
+}
+
 bool LS01B::resServerCallback(ls01b_v2::resolution::Request &req,
                    ls01b_v2::resolution::Response &res)
 {
@@ -350,6 +404,7 @@ void LS01B::recvThread()
     {
       this->resetHealth();
       serial_ = LSIOSR::instance(serial_port_, baud_rate_);
+      usleep(100000);
       run();
       continue;
     }
@@ -512,39 +567,43 @@ void LS01B::pubScanThread()
     msg.scan_time = scan_time;
     msg.time_increment = scan_time / (double)(count - 1);
 
-    for (int i = count - 1; i >= 0; i--)
-    {
-      if (
-          ((i >= (angle_disable_min_0 * count / 360)) && (i < (angle_disable_max_0 * count / 360))) 
-          || ((i >= (angle_disable_min_1 * count / 360)) && (i < (angle_disable_max_1 * count / 360))) 
-          || ((i >= (angle_disable_min_2 * count / 360)) && (i < (angle_disable_max_2 * count / 360))) 
-          || ((i >= (angle_disable_min_3 * count / 360)) && (i < (angle_disable_max_3 * count / 360))) 
-          || ((i >= (angle_disable_min_4 * count / 360)) && (i < (angle_disable_max_4 * count / 360))))
-      {
+    for (int i = count - 1; i >= 0; i--) {
+      if (points[count - i - 1].range == 0.0) {
         msg.ranges[i] = std::numeric_limits<float>::infinity();
         msg.intensities[i] = 0;
       }
-      else if (points[count - i - 1].range == 0.0)
-      {
-        msg.ranges[i] = std::numeric_limits<float>::infinity();
-        msg.intensities[i] = 0;
-      }
-      else
-      {
-        msg.ranges[i] = (float)points[count - i - 1].range;
+      else {
+        msg.ranges[i] = (float) points[count - i - 1].range;
         msg.intensities[i] = points[count - i - 1].intensity;
       }
 
-      double point_dist = msg.ranges[i];
-      if (point_dist < 1.0 && point_dist > 0.06)
+      if (truncated_mode_ == 1)
       {
-        double x = point_dist * cos(i * resolution_ * M_PI / 180);
-        double y = point_dist * sin(i * resolution_ * M_PI / 180);
-
-        double dist2center = sqrt((y - center_y_) * (y - center_y_) + (x - center_x_) * (x - center_x_));
-        if (dist2center < robot_radius_)
-          msg.ranges[i] = std::numeric_limits<float>::infinity();
+        for (int j = 0; j < disable_angle_max_range_.size(); ++j) {
+          if ((i >= (disable_angle_min_range_[j] * count / 360) ) &&
+              (i <= (disable_angle_max_range_[j] * count / 360 ))) {
+            msg.ranges[i] = 0.0;
+            msg.intensities[i] = 0;
+          }
+        }
       }
+      else if (truncated_mode_ == 2)
+      {
+        double point_dist = msg.ranges[i];
+        if (point_dist < 1.0 && point_dist > 0.06)
+        {
+          double x = point_dist * cos(i * resolution_ * M_PI / 180);
+          double y = point_dist * sin(i * resolution_ * M_PI / 180);
+
+          double dist2center = sqrt((y - center_y_) * (y - center_y_) + (x - center_x_) * (x - center_x_));
+          if (dist2center < robot_radius_)
+          {
+            msg.ranges[i] = 0.0;
+            msg.intensities[i] = 0;
+          }
+        }
+      }
+
     }
     pub_.publish(msg);
     // ROS_INFO("getRPM = %f", getRPM());
@@ -554,15 +613,14 @@ void LS01B::pubScanThread()
 
 void LS01B::run()
 {
-  sleep(1);
   setResolution(resolution_);
-  sleep(1);
+  usleep(100000);
   setMotorSpeed(rpm_);
-  sleep(1);
+  usleep(100000);
   switchData(false);
-  sleep(1);
+  usleep(100000);
   startScan();
-  sleep(1);
+  usleep(100000);
   setScanMode(true); 
 }
 
@@ -583,6 +641,7 @@ int main(int argv, char **argc)
   ros::init(argv, argc, "ls01b");
  
   ls::LS01B* ls01b = ls::LS01B::instance();
+  usleep(100000);
   ls01b->run();
   ros::spin();
   return 0;

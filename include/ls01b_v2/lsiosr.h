@@ -5,6 +5,7 @@
 @brief:
 @version:       date:       author:     comments:
 @v1.0           18-8-21     fu          new
+@v1.5           19-04-18     tongsky    Add flushinput function
 *******************************************************/
 #ifndef LSIOSR_H
 #define LSIOSR_H
