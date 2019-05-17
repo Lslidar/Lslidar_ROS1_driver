@@ -125,8 +125,8 @@ bool LslidarC16Decoder::checkPacketValidity(const RawPacket* packet) {
 
 
 void LslidarC16Decoder::publishPointCloud() {
-    VPointCloud::Ptr point_cloud(new VPointCloud());
-
+//    VPointCloud::Ptr point_cloud(new VPointCloud());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr point_cloud(new pcl::PointCloud<pcl::PointXYZI>);
             // pcl_conversions::toPCL(sweep_data->header).stamp;
     point_cloud->header.frame_id = child_frame_id;
     point_cloud->height = 1;
@@ -147,13 +147,12 @@ void LslidarC16Decoder::publishPointCloud() {
 
         if (scan.points.size() == 0) continue;
         size_t j;
-        VPoint point;
+        pcl::PointXYZI point;
         for (j = 1; j < scan.points.size()-1; ++j) {
             if ((scan.points[j].azimuth > angle3_disable_min) and (scan.points[j].azimuth < angle3_disable_max))
             {
                 continue;
             }
-            point.timestamp = timestamp;
             point.x = scan.points[j].x;
             point.y = scan.points[j].y;
             point.z = scan.points[j].z;
@@ -162,9 +161,11 @@ void LslidarC16Decoder::publishPointCloud() {
             ++point_cloud->width;
         }
     }
-    {
-        point_cloud_pub.publish(point_cloud);
-    }
+
+    sensor_msgs::PointCloud2 pc_msg;
+    pcl::toROSMsg(*point_cloud, pc_msg);
+    point_cloud_pub.publish(pc_msg);
+
     return;
 }
 
