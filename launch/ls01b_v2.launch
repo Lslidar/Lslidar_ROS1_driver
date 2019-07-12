@@ -7,23 +7,8 @@
         <param name="angle_resolution" value="0.25"/>     #雷达角度分辨率
         <param name="zero_as_max" value="false"/>        # 设置为true探测不到区域会变成最大值
         <param name="min_as_zero" value="false"/>        # true：探测不到区域为0，false：探测不到区域为inf
-        <param name="angle_disable_min_0" value="-1"/>    # 角度制，从angle_disable_min到angle_disable_max之前的值为0
-        <param name="angle_disable_max_0" value="-1"/>
-        <param name="angle_disable_min_1" value="-1"/>    # 角度制，从angle_disable_min到angle_disable_max之前的值为0
-        <param name="angle_disable_max_1" value="-1"/>
-        <param name="angle_disable_min_2" value="-1"/>    # 角度制，从angle_disable_min到angle_disable_max之前的值为0
-        <param name="angle_disable_max_2" value="-1"/>
-        <param name="angle_disable_min_3" value="-1"/>    # 角度制，从angle_disable_min到angle_disable_max之前的值为0
-        <param name="angle_disable_max_3" value="-1"/>
-        <param name="angle_disable_min_4" value="-1"/>    # 角度制，从angle_disable_min到angle_disable_max之前的值为0
-        <param name="angle_disable_max_4" value="-1"/>
-        <param name="robot_radius" value="0.22"/>         # 机器人半径
-        <param name="center_x" value="0.0"/>            # 雷达坐标系下机器人中心位置
-        <param name="center_y" value="0.105"/>
         <param name="rpm" value="600"/>                 #　雷达转速
-        <rosparam file="$(find ls01b_v2)/launch/includes/disable_angle.yaml" command="load"/>
+        <rosparam file="$(find ls01b_v2)/launch/includes/filter.yaml" command="load"/>
     </node>
-
-<!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find ls01d)/launch/rviz.rviz"/>-->
 </launch>
 

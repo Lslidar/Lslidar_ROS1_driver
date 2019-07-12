@@ -1,0 +1,8 @@
+disable_min: [0, 30, 60, 90]
+disable_max: [10, 40, 70, 180]
+
+robot_radius: 0.22 # 机器人半径
+center_x: 0.0   # 雷达坐标系下机器人中心位置
+center_y: 0.1
+
+truncated_mode: 0 # 0: 不使用过滤 ;1 :按角度过滤; 2 按半径截取； 3： 按角度加半径截取

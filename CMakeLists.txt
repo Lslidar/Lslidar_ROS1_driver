@@ -9,15 +9,23 @@ find_package(catkin REQUIRED COMPONENTS
   std_srvs
   sensor_msgs
   message_generation
+        dynamic_reconfigure
 )
 find_package(Boost REQUIRED)
+
+generate_dynamic_reconfigure_options(
+  cfg/Filter.cfg
+)
 
 add_service_files(FILES resolution.srv)
 
 generate_messages(DEPENDENCIES std_msgs)
 
 catkin_package(CATKIN_DEPENDS roscpp std_srvs
-rospy std_msgs message_runtime)
+rospy std_msgs message_runtime dynamic_reconfigure)
+
+include_directories(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
+
 include_directories(include)
 include_directories(${catkin_INCLUDE_DIRS})
 

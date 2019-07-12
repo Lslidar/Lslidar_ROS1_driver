@@ -17,6 +17,8 @@
 #include "ls01b_v2/lsiosr.h"
 #include "ls01b_v2/resolution.h"
 #include <std_srvs/SetBool.h>
+#include <dynamic_reconfigure/server.h>
+#include "ls01b_v2/FilterConfig.h"
 
 namespace ls {
 
@@ -123,7 +125,7 @@ public:
     void initParam();
     void recvThread();
     void pubScanThread();
-    
+    void DynParamCallback(ls01b_v2::FilterConfig &config, uint32_t level);
 
     uint16_t checkSum(const uint8_t *p_byte);
 
@@ -152,6 +154,7 @@ public:
     int points_size_;
     int rpm_;
     double real_rpm_;
+    double special_range_;
 
     ros::Time pre_time_;
     ros::Time time_;

@@ -1,3 +1,0 @@
-disable_min: [0, 30, 60, 90]
-disable_max: [10, 40, 70, 180]
-truncated_mode: 2 # 0: ignore truncated function ;1 :truncated laser with specific angle ranges; 2 truncate laser data with radius limits

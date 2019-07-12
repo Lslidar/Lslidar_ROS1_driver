@@ -23,7 +23,7 @@ LS01B * LS01B::instance()
 LS01B::LS01B()
 {
   initParam();
-  pub_ = n_.advertise<sensor_msgs::LaserScan>(scan_topic_, 1000);
+  pub_ = n_.advertise<sensor_msgs::LaserScan>(scan_topic_, 3);
   serial_ = LSIOSR::instance(serial_port_, baud_rate_);
   serial_->init();
   changeRes_client = n_.advertiseService("resolution_control", &LS01B::resServerCallback, this);
@@ -69,6 +69,7 @@ void LS01B::initParam()
   nh.param("center_x", center_x_, 0.0);
   nh.param("center_y", center_y_, 0.0);
   nh.param("rpm", rpm_, 600);
+  nh.param("special_range", special_range_, 0.0);
 
   scan_health_ = 0;
   is_shutdown_ = false;
@@ -101,10 +102,37 @@ void LS01B::initParam()
   }
   else if (truncated_mode_ == 2)
       ROS_INFO("truncated mode is radius limits");
+  else if (truncated_mode_ == 3)
+      ROS_INFO("truncated mode is radius and specific angle ranges");
   else
       ROS_INFO("truncated mode is disable");
+
+  dynamic_reconfigure::Server<ls01b_v2::FilterConfig> *dsrv_;
+  dsrv_ = new dynamic_reconfigure::Server<ls01b_v2::FilterConfig>(nh);
+  dynamic_reconfigure::Server<ls01b_v2::FilterConfig>::CallbackType cb = boost::bind(&LS01B::DynParamCallback, this, _1, _2);
+  dsrv_->setCallback(cb);
 }
 
+void
+LS01B::DynParamCallback(ls01b_v2::FilterConfig &config, uint32_t level)
+{
+  ROS_INFO("reaction parameters reconfigure request received!");
+  robot_radius_ = config.robot_radius;
+  truncated_mode_ = config.truncated_mode;
+  center_x_ = config.center_x;
+  center_y_ = config.center_y;
+  double sr = config.special_range;
+  if (sr > 90)
+  {
+    special_range_ = std::numeric_limits<float>::infinity();
+  } else
+  {
+      special_range_ = sr;
+  }
+  ROS_INFO("current robot radius is %1.3f, centerx %1.3f, centery %1.3f", config.robot_radius, config.center_x, config.center_y);
+  ROS_INFO("Truncated Mode is %d, special range for truncated laser data is %3.3f", truncated_mode_, special_range_);
+
+}
 bool LS01B::isHealth()
 {
   return (scan_health_ < 0) ? false : true;
@@ -560,8 +588,8 @@ void LS01B::pubScanThread()
     msg.angle_min = 0.0;
     msg.angle_max = 2 * M_PI;
     msg.angle_increment = (msg.angle_max - msg.angle_min) / count;
-    msg.range_min = 0.01;
-    msg.range_max = 25;
+    msg.range_min = 0.15;
+    msg.range_max = 16;
     msg.ranges.resize(count);
     msg.intensities.resize(count);
     msg.scan_time = scan_time;
@@ -577,17 +605,17 @@ void LS01B::pubScanThread()
         msg.intensities[i] = points[count - i - 1].intensity;
       }
 
-      if (truncated_mode_ == 1)
+      if ((truncated_mode_ == 1) or (truncated_mode_ == 3))
       {
         for (int j = 0; j < disable_angle_max_range_.size(); ++j) {
           if ((i >= (disable_angle_min_range_[j] * count / 360) ) &&
               (i <= (disable_angle_max_range_[j] * count / 360 ))) {
-            msg.ranges[i] = 0.0;
+            msg.ranges[i] = special_range_;
             msg.intensities[i] = 0;
           }
         }
       }
-      else if (truncated_mode_ == 2)
+      if ((truncated_mode_ == 2) or (truncated_mode_ == 3))
       {
         double point_dist = msg.ranges[i];
         if (point_dist < 1.0 && point_dist > 0.06)
@@ -598,7 +626,7 @@ void LS01B::pubScanThread()
           double dist2center = sqrt((y - center_y_) * (y - center_y_) + (x - center_x_) * (x - center_x_));
           if (dist2center < robot_radius_)
           {
-            msg.ranges[i] = 0.0;
+            msg.ranges[i] = special_range_;
             msg.intensities[i] = 0;
           }
         }
