@@ -70,6 +70,7 @@ void LS01B::initParam()
   nh.param("center_y", center_y_, 0.0);
   nh.param("rpm", rpm_, 600);
   nh.param("special_range", special_range_, 0.0);
+  nh.param("angle_compensate", flag_angle_compensate, true);
 
   scan_health_ = 0;
   is_shutdown_ = false;
@@ -122,6 +123,7 @@ LS01B::DynParamCallback(ls01b_v2::FilterConfig &config, uint32_t level)
   center_x_ = config.center_x;
   center_y_ = config.center_y;
   double sr = config.special_range;
+  flag_angle_compensate = config.angle_compensate;
   if (sr > 90)
   {
     special_range_ = std::numeric_limits<float>::infinity();
@@ -129,6 +131,7 @@ LS01B::DynParamCallback(ls01b_v2::FilterConfig &config, uint32_t level)
   {
       special_range_ = sr;
   }
+  ROS_INFO("Enable angle compensate or not %d", flag_angle_compensate);
   ROS_INFO("current robot radius is %1.3f, centerx %1.3f, centery %1.3f", config.robot_radius, config.center_x, config.center_y);
   ROS_INFO("Truncated Mode is %d, special range for truncated laser data is %3.3f", truncated_mode_, special_range_);
 
@@ -560,6 +563,12 @@ void LS01B::recvThread()
   }
 }
 
+double LS01B::angle_compensate(double dist)
+{
+  double offset = (0.02345 / dist) * 57.3;
+  return offset;
+}
+
 void LS01B::pubScanThread()
 {
   bool wait_for_wake = true;
@@ -601,7 +610,27 @@ void LS01B::pubScanThread()
         msg.intensities[i] = 0;
       }
       else {
-        msg.ranges[i] = (float) points[count - i - 1].range;
+        double dist = points[count - i - 1].range;
+        if (flag_angle_compensate) {
+          double offset = angle_compensate(dist);
+          int actual_index = i;
+          int fix_index = int16_t (offset / resolution_);
+            ROS_DEBUG("dist is %2.2f, current idx is %d, offset is %2.3f, fix_index is %d",dist, i,  offset, fix_index);
+
+          int j = (i - fix_index);
+            if (j > 0) {
+              actual_index = j;
+            } else {
+              actual_index = points_size_ + j;
+            }
+            msg.ranges[actual_index] = (float) dist;
+            if (i == 0)
+            {
+                msg.ranges[i] = (msg.ranges[1] + msg.ranges[count-1]) / 2.0;
+            }
+        } else{
+          msg.ranges[i] = (float) dist;
+        }
         msg.intensities[i] = points[count - i - 1].intensity;
       }
 

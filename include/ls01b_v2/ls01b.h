@@ -115,6 +115,8 @@ public:
 
     void run();
 
+    double angle_compensate(double dist);
+
     bool resServerCallback(ls01b_v2::resolution::Request &req,
                    ls01b_v2::resolution::Response &res);
 
@@ -146,6 +148,7 @@ public:
     bool is_start_;       // begin to read data from lidar
     bool use_angle_;
     bool start_switch;
+    bool flag_angle_compensate;
     
     int scan_health_; // 0 OK
     double resolution_;
