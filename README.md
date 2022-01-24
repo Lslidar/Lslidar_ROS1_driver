@@ -2,19 +2,23 @@ ROS Installation
 -----
 [ubuntu](http://wiki.ros.org/Installation/Ubuntu)
 
+Before starting this tutorial, please complete the installation. This tutotial assumes that Ubuntu is being used.
+
 Create a ROS workspace
 ----
 [Create a workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) 
 
-Supported Operating
+Find the branch of your Lidar and download the relative files
 ----
-ubuntu 16.04
-ubuntu 18.04
+<img width="500" alt="WeChate9021da219d4f44f28f063c9c70a0dfb" src="https://user-images.githubusercontent.com/75661795/150705753-0628ff36-3ca1-4218-86a2-7ffa229831c4.png">
+<img width="500" alt="WeChat60cf2a0adcde7887e7b31d476902f5f9" src="https://user-images.githubusercontent.com/75661795/150705810-1bdcf1d6-fece-463b-a0a4-12e2d33e244f.png">
+<img width="500" alt="WeChatf957b5459aa3e601b4a13df60fa29404" src="https://user-images.githubusercontent.com/75661795/150706346-c5e258a1-bd94-4370-b175-b63274ab72c3.png">
 
-Build lslidar ROS Package
+FAQ
 ----
-1) Clone this project to your catkin's workspace src folder<br>
-     * C16<br>
-     $ git clone https://github.com/lsLIDAR/lslidar_ros/C32_v2.6<br>
-2)$ catkin_make<br>
-3) $ source devel/setup.bash/<br>
+
+Techinical Support
+----
+Any more question please commit an issue
+
+Or contact support@lslidar.com
