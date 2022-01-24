@@ -3,9 +3,9 @@
 ## Preparation
 
 ### Supported Operating System
-Unbuntu 16.04 Kinetic
+Unbuntu 16.04 + ROS Kinetic
 
-Ubuntu 18.04 Melodic
+Ubuntu 18.04 + ROS Melodic
 
 ### ROS Installation
 
