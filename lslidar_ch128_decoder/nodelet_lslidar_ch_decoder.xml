@@ -1,0 +1,10 @@
+<library path="lib/liblslidar_ch_decoder_nodelet">
+  <class name="lslidar_ch_decoder/LslidarChDecoderNodelet"
+         type="lslidar_ch_decoder::LslidarChDecoderNodelet"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Aggregates points from multiple packets, publishing LslidarChSweep msg defined
+      in lslidar_ch_msgs.
+    </description>
+  </class>
+</library>

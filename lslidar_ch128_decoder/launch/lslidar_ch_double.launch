@@ -1,0 +1,62 @@
+<launch>
+  <arg name="device_ip1" default="192.168.1.200" />
+  <arg name="msop_port1" default="2368" />
+  <arg name="difop_port1" default="2369" />
+ <arg name="device_ip2" default="192.168.1.200" />
+  <arg name="msop_port2" default="2368" />
+  <arg name="difop_port2" default="2369" />
+  <arg name="time_synchronization" default="false" />
+
+  <node pkg="lslidar_ch128_driver" type="lslidar_ch128_driver_node" name="lslidar_ch128_driver_node" output="screen" ns="LeftLidar" launch-prefix="gnome-terminal -e">
+    <!--param name="pcap" value="$(find lslidar_ch128_driver)/pcap/12.pcap"/-->
+    <param name="lidar_ip" value="$(arg device_ip1)"/>
+    <param name="msop_port" value="$(arg msop_port1)" />
+    <param name="difop_port" value="$(arg difop_port1)"/>
+    <param name="device_port" value="2368"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.2"/>
+    <param name="time_synchronization" value="$(arg time_synchronization)"/>
+  </node>
+
+  <node pkg="lslidar_ch128_decoder" type="lslidar_ch128_decoder_node" name="lslidar_ch128_decoder_node" output="screen" ns="LeftLidar">
+    <param name="frame_id" value="laser_link_left"/>
+    <param name="point_num" value="2000"/>
+    <param name="min_range" value="0.15"/>
+    <param name="max_range" value="150.0"/>
+    <Param name="lslidar_point_cloud" value="lslidar_pointcloud_ch128"/>
+    <param name="frequency" value="10"/>
+    <param name="publish_point_cloud" value="true"/>
+    <param name="use_gps_ts" value="true"/>
+    <param name="publish_scan" value="false"/>
+    <param name="channel_num" value="8"/>
+  </node>
+
+  <node pkg="lslidar_ch128_driver" type="lslidar_ch128_driver_node" name="lslidar_ch128_driver_node" output="screen" ns="RightLidar" launch-prefix="gnome-terminal -e">
+    <!--param name="pcap" value="$(find lslidar_ch128_driver)/pcap/12.pcap"/-->
+    <param name="lidar_ip" value="$(arg device_ip2)"/>
+    <param name="msop_port" value="$(arg msop_port2)" />
+    <param name="difop_port" value="$(arg difop_port2)"/>
+    <param name="device_port" value="2370"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.2"/>
+    <param name="time_synchronization" value="$(arg time_synchronization)"/>
+  </node>
+
+  <node pkg="lslidar_ch128_decoder" type="lslidar_ch128_decoder_node" name="lslidar_ch128_decoder_node" output="screen" ns="RightLidar">
+    <param name="frame_id" value="laser_link_right"/>
+    <param name="point_num" value="2000"/>
+    <param name="min_range" value="0.15"/>
+    <param name="max_range" value="150.0"/>
+    <Param name="lslidar_point_cloud" value="lslidar_pointcloud_ch128"/>
+    <param name="frequency" value="10"/>
+    <param name="publish_point_cloud" value="true"/>
+    <param name="use_gps_ts" value="true"/>
+    <param name="publish_scan" value="false"/>
+    <param name="channel_num" value="8"/>
+  </node>
+ 
+
+  <!--node pkg="tf" type="static_transform_publisher" name="base_link2laser" args="0 0 0 0 0 0 world laser_link_right 100" /-->
+  <!--node pkg="tf" type="static_transform_publisher" name="base_link2laser2" args="0 0 10 0 0 0 world laser_link_left 100" /-->
+</launch>
+

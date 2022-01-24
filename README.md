@@ -1,95 +1,148 @@
-# lslidar_c16
+ROS Installation
+-----
 
-## version track
-Author: Yutong
+[ubuntu](http://wiki.ros.org/Installation/Ubuntu)
 
-### ver1.2 Yutong
-1. Add group multicast function
-2. Add truncate 3D angle area data
+Before starting this turorial, please complete installation . This tutorial assumes that Ubuntu is being used.
 
-
-### ver1.1  Yutong
-Using new message type to distinguish different channel data
-topic name: scan_channel
-topic type: LslidarC16Layer
-details: LslidarC16Layer is consist of 16 sets data for different channel, each set of data is represented by Sensor_msgs/LaserScan rosmessage type
-Usage: rostopic echo /scan_channel  will output all 16 channels data
-       rostopic echo /scan_channel/scan_channel[*]  (* can be from 0 to 15 represents channel num)  --> output data will be sensor_msgs/LaserScan message type
-Example: There is an example script to show you how to obtain each channel data, located at /lslidar_c16_decoder/scripts/Test_MultiChannel.py
-	 You will need python package numpy and matplotlib.pyplot(optional) to fully run this script
-
-
-### ver1.05 Yutong
-Using rostopic to select the channel you wish to output
-topic name: layer_num
-topic type: std_msgs/Int8
-details: send layer number to topic layer_num 
-Usage: rostopic pub /layer_num std_msgs/Int8 "data: 5"  --> output channel 5 data to topic /scan, message type is sensor_msgs/LaserScan . data number can only from 0 to 15
+# lslidar_ch128_V2.0
 
 ## Description
-The `lslidar_c16` package is a linux ROS driver for lslidar c16.
-The package is tested on Ubuntu 14.04 with ROS indigo.
 
-## Compling
-This is a Catkin package. Make sure the package is on `ROS_PACKAGE_PATH` after cloning the package to your workspace. And the normal procedure for compling a catkin package will work.
+The `lslidar_ch128_v2.0` package is a linux ROS driver for lslidar CH128_ V2.0.
+
+Supported Operating
+----
+
+Ubuntu 16.04 Kinetic
+Ubuntu 18.04 Melodic
+
+## Connect to the lidar
+
+1. Power the lidar via the included adapter
+2. Connect the lidar to an Ethernet port on your computer.
+3. Assign the computer IP based on the default DEST IP `192.168.1.102.` <br>`sudo ifconfig eth0 192.168.1.102`（eth0 is the network card name ）<br>
+
+## Compiling
+
+This is a Catkin package. Make sure the package is on `ROS_PACKAGE_PATH`  after cloning the package to your workspace. And the normal procedure for compiling a catkin package will work.
 
 ```
-cd your_work_space
-catkin_make 
+cd your_work_space<br>
+cd src<br>
+git clone –b CH128_v2.0 https://github.com/lsLIDAR/lslidar_ros/CH128_v2.0<br>
+catkin_make<br>
+source devel/setup.bash/<br>
 ```
 
-## Example Usage
+## View Data
 
-### lslidar_c16_decoder
+1. Launch the provided pointcloud generation launch file.
 
-**Parameters**
+```
+roslaunch lslidar_ch_decoder lslidar_ch.launch
+```
+
+1. Launch rviz, with the "laser_link" frame as the fixed frame.
+
+```
+rosrun rviz rviz -f laser_link
+```
+
+1. In the "displays" panel, click `Add`, click`By topic`,then select `pointcloud2`, then press `OK`.
+
+2. In the "Topic" field of the new `pointcloud2` tab, enter `/lslidar_point_cloud`.
+
+### **Parameters**
 
 `device_ip` (`string`, `default: 192.168.1.200`)
 
 By default, the IP address of the device is 192.168.1.200.
 
-`frame_id` (`string`, `default: laser`)
+`msop_port`(`int`, `default:2368`)
 
-The frame ID entry for the sent messages.
+Default value: 2368. Data package port. Modifiable, please keep it consistent with the data package port set by the host computer. 
+
+`difop_port`(`int`, `default:2369`)
+
+Default value:2369. Device package port. Modifiable, please keep it consistent with the device package port set by the host computer. 
+
+`time_synchronization` (`bool`, `default: false`)
+
+Whether to open the external time synchronization (pre-configuration required). Default value: false (true: yes; false: no). 
+
+
+### lslidar_ch128_driver
+
+`add_multicast`(`bool`,`default: false`)
+
+Default value: false (true: yes; false: no). Whether to switch to the multicast mode. 
+
+`group_ip`(`string`,`default:224.1.1.2`)
+
+Default value: 224.1.1.2. Multicast IP. Enabled when the value of add_multicast is "true".
+
+
+### lslidar_ch128_decoder
+
+`frame_id` (`string`, `default: laser_link`)
+
+Default value: laser_link. Point cloud coordinates name.
+
+`point_num` (`int`, `default: 2000`)
+
+Point cloud number in each frame. Different under various frequency. Default value: 2000.
+
+`min_range` (`double`, `default: 0.15`)
+
+The minimum scanning range. Point cloud data inside this range would be removed. Default value: 0.15 meters.
+
+`max_range` (`double`, `default: 150.0`)
+
+The maximum scanning range. Point cloud data outside this range would be removed. Default value: 150 meters.
+
+`lslidar_point_cloud` (`string`, `default: lslidar_point_cloud`)
+
+Point cloud topic name.
+
+`frequency` (`double`, `default: 10.0`)
+
+Lidar scanning frequency. Default value: 10.0Hz.
+
+`publish_point_cloud` (`bool`, `default: true`)
+
+Publish point cloud topic. Default value: true (true: yes; false: no)
+
+`use_gps_ts` (`bool`, `default: true`)
+
+Whether to use GPS time synchronization (pre-configuration required). Default value: true (true: yes; false: no).
+
+`publish_scan` (`bool`, `default: false`)
+
+Publish laserscan point cloud topic. Default value: false (true: yes; false: no)
+
+`channel_num` (`int`, `default: 32`)
+
+The channel number presented when publish_laserscan is opened. Default value: 32.
 
 **Published Topics**
-
-`lslidar_packets` (`lslidar_c16_msgs/LslidarC16Packet`)
-
-Each message corresponds to a lslidar packet sent by the device through the Ethernet.
-
-### lslidar_c16_decoder
-
-**Parameters**
-
-`min_range` (`double`, `0.15`)
-
-`max_range` (`double`, `150.0`)
-
-Points outside this range will be removed.
-
-`frequency` (`frequency`, `10.0`)
-
-Note that the driver does not change the frequency of the sensor. 
-
-`publish_point_cloud` (`bool`, `true`)
-
-If set to true, the decoder will additionally send out a local point cloud consisting of the points in each revolution.
-
-**Published Topics**
-
-`lslidar_sweep` (`lslidar_c16_msgs/LslidarC16Sweep`)
-
-The message arranges the points within each sweep based on its scan index and azimuth.
 
 `lslidar_point_cloud` (`sensor_msgs/PointCloud2`)
 
 This is only published when the `publish_point_cloud` is set to `true` in the launch file.
 
+`lslidar_packets` (`lslidar_ch_msgs/LslidarchPacket`)
+
+Each message corresponds to a lslidar packet sent by the device through the Ethernet.
+
+`scan` (`lslidar_ch_msgs/LaserScan`)
+
+This is only published when the `publish_scan`is set to `true` in the launch file
+
 **Node**
 
 ```
-roslaunch lslidar_c16_decoder lslidar_c16.launch --screen
+roslaunch lslidar_ch128_decoder lslidar_ch.launch
 ```
 
 Note that this launch file launches both the driver and the decoder, which is the only launch file needed to be used.
@@ -97,12 +150,18 @@ Note that this launch file launches both the driver and the decoder, which is th
 
 ## FAQ
 
+## Technical support
 
-## Bug Report
+Any more question please commit an issue.
 
-
-
-
-
+Or connect support@lslidar.com
 
 
+
+
+
+
+
+
+
+****
