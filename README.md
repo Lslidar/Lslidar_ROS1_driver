@@ -9,9 +9,9 @@ Ubuntu 18.04 Melodic
 
 ### ROS Installation
 
-[ubuntu](http://wiki.ros.org/Installation/Ubuntu)
+[Ubuntu](http://wiki.ros.org/Installation/Ubuntu)
 
-Before starting this tutorial, please complete the installation. This tutotial assumes that Ubuntu is being used.
+_*Before starting this tutorial, please complete the installation. This tutotial assumes that Ubuntu is being used._
 
 ### Create a ROS workspace
 
@@ -33,54 +33,54 @@ _**Clone:** To clone each Lidar's repository, please copy and paste the correspo
 
 
 ### C16_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/C16_v2.0)
-**Linux/Mac:** `git clone -b C16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b C16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch C16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch C16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### C16_v2.6 [link](https://github.com/Lslidar/lslidar_ros/tree/C16_v2.6)
-**Linux/Mac:** `git clone -b C16_v2.6 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b C16_v2.6 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch C16_v2.6 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch C16_v2.6 https://github.com/Lslidar/lslidar_ros.git`
 
 ### C16_v3.0 [link](https://github.com/Lslidar/lslidar_ros/tree/C16_v3.0)
-**Linux/Mac:** `git clone -b C16_v3.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b C16_v3.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch C16_v3.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch C16_v3.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### C32_v2.6 [link](https://github.com/Lslidar/lslidar_ros/tree/C32_v2.6)
-**Linux/Mac:** `git clone -b C32_v2.6 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b C32_v2.6 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch C32_v2.6 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch C32_v2.6 https://github.com/Lslidar/lslidar_ros.git`
 
 ### C32_v3.0 [link](https://github.com/Lslidar/lslidar_ros/tree/C32_v3.0)
-**Linux/Mac:** `git clone -b C32_v3.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b C32_v3.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch C32_v3.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch C32_v3.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### CH16_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH16_v2.0)
-**Linux/Mac:** `git clone -b CH16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b CH16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch CH16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch CH16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### CH32_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH32_v1.0)
-**Linux/Mac:** `git clone -b CH32_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b CH32_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch CH32_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch CH32_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### CH32_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH32_v2.0)
-**Linux/Mac:** `git clone -b CH32_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b CH32_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch CH32_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch CH32_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### CH64W_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH64W_v1.0)
-**Linux/Mac:** `git clone -b CH64W_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b CH64W_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch CH64W_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch CH64W_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### CH64_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH64_v1.0)
-**Linux/Mac:** `git clone -b CH64_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+Linux/Mac: `git clone -b CH64_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
-**Windows:** `git clone --branch CH64_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+Windows: `git clone --branch CH64_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
 FAQ
 ----
