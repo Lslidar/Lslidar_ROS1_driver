@@ -28,11 +28,11 @@ Ubuntu 18.04 Melodic
 This is a Catkin package. Make sure the package is on `ROS_PACKAGE_PATH`  after cloning the package to your workspace. And the normal procedure for compiling a catkin package will work.
 
 ```
-cd your_work_space<br>
-cd src<br>
-git clone–b CH114_v1.0 https://github.com/lsLIDAR/lslidar_ros/CH114_v1.0<br>
-catkin_make<br>
-source devel/setup.bash/<br>
+cd your_work_space
+cd src
+git clone -b CH114_v1.0 https://github.com/Lslidar/lslidar_ros.git
+catkin_make
+source devel/setup.bash
 ```
 
 ## View Data
