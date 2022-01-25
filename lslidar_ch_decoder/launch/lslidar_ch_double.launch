@@ -1,0 +1,56 @@
+<launch>
+
+  <node pkg="lslidar_ch_driver" type="lslidar_ch_driver_node" name="lslidar_ch_driver_node" output="screen" ns="LeftLidar" launch-prefix="gnome-terminal -e">
+    <param name="lidar_ip" value="192.168.1.200"/>
+    <param name="device_port" value="2368"/>
+	<param name="add_multicast" value="false"/>
+	<param name="group_ip" value="224.1.1.2"/>
+  </node>
+
+  <node pkg="lslidar_ch_decoder" type="lslidar_ch_decoder_node" name="lslidar_ch_decoder_node" output="screen" ns="LeftLidar" >
+    <param name="frame_id" value="laser_link_left"/>
+    <param name="point_num" value="2000"/>
+    <param name="channel_num" value="0"/>
+    <param name="angle_disable_min" value="0"/>
+    <param name="angle_disable_max" value="0"/>
+    <param name="angle3_disable_min" value="0"/>
+    <param name="angle3_disable_max" value="0"/>
+    <param name="min_range" value="0.15"/>
+    <param name="max_range" value="150.0"/>
+    <param name="frequency" value="10.0"/>
+    <Param name="lslidar_point_cloud" value="lslidar_point_cloud_left"/>
+    <param name="publish_point_cloud" value="true"/>
+    <param name="publish_scan" value="true"/>
+    <param name="use_gps_ts" value="false"/>
+  </node>
+  
+  
+  <node pkg="lslidar_ch_driver" type="lslidar_ch_driver_node" name="lslidar_ch_driver_node" output="screen" ns="RightLidar" launch-prefix="gnome-terminal -e">
+    <param name="lidar_ip" value="192.168.1.201"/>
+    <param name="device_port" value="2370"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.3"/>
+  </node>
+
+  <node pkg="lslidar_ch_decoder" type="lslidar_ch_decoder_node" name="lslidar_ch_decoder_node" output="screen" ns="RightLidar">
+    <param name="frame_id" value="laser_link_right"/>
+    <param name="point_num" value="2000"/>
+    <param name="channel_num" value="0"/>
+    <param name="angle_disable_min" value="0"/>
+    <param name="angle_disable_max" value="0"/>
+    <param name="angle3_disable_min" value="0"/>
+    <param name="angle3_disable_max" value="0"/>
+    <param name="min_range" value="0.15"/>
+    <param name="max_range" value="150.0"/>
+    <param name="frequency" value="10.0"/>
+    <Param name="lslidar_point_cloud" value="lslidar_point_cloud_right"/>
+    <param name="publish_point_cloud" value="true"/>
+    <param name="publish_scan" value="true"/>
+    <param name="use_gps_ts" value="false"/>
+  </node>
+
+
+  <node pkg="tf" type="static_transform_publisher" name="base_link2laser" args="0 0 0 0 0 0 world laser_link_right 100" />
+  <node pkg="tf" type="static_transform_publisher" name="base_link2laser2" args="0 0 0 0 0 0 world laser_link_left 100" />
+</launch>
+

@@ -1,0 +1,2 @@
+set(lslidar_ch_msgs_MESSAGE_FILES "/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/msg/LslidarChLayer.msg;/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/msg/LslidarChPacket.msg;/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/msg/LslidarChPoint.msg;/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/msg/LslidarChScan.msg;/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/msg/LslidarChSweep.msg;/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/msg/LslidarChScanUnified.msg")
+set(lslidar_ch_msgs_SERVICE_FILES "")

@@ -1,0 +1,8 @@
+prefix=/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/cmake-build-debug/devel
+
+Name: lslidar_ch_msgs
+Description: Description of lslidar_ch_msgs
+Version: 1.0.0
+Cflags: -I/home/ls-lqm/Desktop/ms_hs1/src/lslidar_ch/lslidar_ch_msgs/cmake-build-debug/devel/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime std_msgs sensor_msgs

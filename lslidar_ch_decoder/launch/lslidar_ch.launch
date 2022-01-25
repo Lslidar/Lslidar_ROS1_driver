@@ -1,0 +1,32 @@
+<launch>
+
+  <arg name="device_ip" default="192.168.1.200" />
+  <arg name="msop_port" default="2368" />
+  <arg name="difop_port" default="2369" />
+  <arg name="time_synchronization" default="true" />
+  <node pkg="lslidar_ch_driver" type="lslidar_ch_driver_node" name="lslidar_ch_driver_node" output="screen">
+    <param name="lidar_ip" value="$(arg device_ip)"/>
+    <param name="msop_port" value="$(arg msop_port)" />
+    <param name="difop_port" value="$(arg difop_port)"/>
+    <param name="device_port" value="2368"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.2"/>
+    <param name="time_synchronization" value="$(arg time_synchronization)"/>
+  </node>
+
+  <node pkg="lslidar_ch_decoder" type="lslidar_ch_decoder_node" name="lslidar_ch_decoder_node" output="screen">
+    <param name="frame_id" value="laser_link"/>
+    <param name="point_num" value="2000"/>
+    <param name="min_range" value="0.05"/>
+    <param name="max_range" value="300.0"/>
+    <Param name="lslidar_point_cloud" value="lslidar_point_cloud"/>
+    <param name="frequency" value="10.0"/>
+    <param name="return_model" value="0"/>
+    <param name="publish_point_cloud" value="true"/>
+    <param name="use_gps_ts" value="false"/>
+  </node>
+  
+
+  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find lslidar_ch_decoder)/launch/lslidar_ch.rviz" output="screen"/-->
+
+</launch>
