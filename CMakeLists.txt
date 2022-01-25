@@ -5,7 +5,7 @@ set( CMAKE_CXX_FLAGS "-std=c++11 -O3" )
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  std_msgs
+  std_msgs 
   std_srvs
   sensor_msgs
   message_generation
@@ -13,11 +13,11 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Boost REQUIRED)
 
+add_service_files(FILES resolution.srv)
+
 generate_dynamic_reconfigure_options(
   cfg/Filter.cfg
 )
-
-add_service_files(FILES resolution.srv)
 
 generate_messages(DEPENDENCIES std_msgs)
 

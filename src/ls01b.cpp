@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <signal.h>
 
+#define	MAX_BUF 350
+
 namespace ls{
 LS01B * LS01B::instance()
 {
@@ -23,10 +25,16 @@ LS01B * LS01B::instance()
 
 LS01B::LS01B()
 {
+  int code = 0;
   initParam();
   pub_ = n_.advertise<sensor_msgs::LaserScan>(scan_topic_, 3);
   serial_ = LSIOSR::instance(serial_port_, baud_rate_);
-  serial_->init();
+  code = serial_->init();
+  if(code != 0)
+  {
+	ros::shutdown();
+	exit(0);
+  }
   changeRes_client = n_.advertiseService("resolution_control", &LS01B::resServerCallback, this);
   start_client = n_.advertiseService("start_control", &LS01B::startCallback, this);
   recv_thread_ = new boost::thread(boost::bind(&LS01B::recvThread, this));
@@ -36,7 +44,14 @@ LS01B::LS01B()
 LS01B::~LS01B()
 {
   printf("start LS01B::~LS01B()\n");
+  stopRecvData();
+  usleep(100000);
+  stopRecvData();
+  usleep(100000);
   stopScan();
+  usleep(100000);
+  stopScan();
+
   is_shutdown_ = true;
 
   pubscan_thread_->interrupt();
@@ -55,6 +70,7 @@ LS01B::~LS01B()
   delete serial_;
   printf("end LS01B::~LS01B()\n");
 }
+
 void LS01B::initParam()
 {
   std::string scan_topic = "/scan";
@@ -125,6 +141,8 @@ LS01B::DynParamCallback(ls01b_v2::FilterConfig &config, uint32_t level)
   center_y_ = config.center_y;
   double sr = config.special_range;
   flag_angle_compensate = config.angle_compensate;
+  
+   ROS_INFO("Enable angle sr is %lf",sr);
   if (sr > 90)
   {
     special_range_ = std::numeric_limits<float>::infinity();
@@ -149,12 +167,11 @@ bool LS01B::resetHealth()
 
 int LS01B::getScan(std::vector<ScanPoint> &points, ros::Time &scan_time, float &scan_duration)
 {
-  // boost::unique_lock<boost::mutex> lock(mutex_);
+   boost::unique_lock<boost::mutex> lock(mutex_);
   points.assign(scan_points_bak_.begin(), scan_points_bak_.end());
   scan_time = pre_time_;
 
   scan_duration = (time_ - pre_time_).toSec();
-  // ROS_INFO("scan_duration = %f", scan_duration);
 }
 
 int LS01B::getVersion(std::string &version)
@@ -221,7 +238,7 @@ int LS01B::setScanMode(bool is_continuous)
   int rtn = serial_->send((const char *)data, 2);
   if (rtn < 0)
   {
-    printf("setScanMode error !\n");
+    printf("error !\n");
     scan_health_ = -1;
     return rtn;
   }
@@ -248,6 +265,8 @@ int LS01B::stopRecvData()
   is_start_ = false;
   return rtn;
 }
+
+
 
 int LS01B::switchData(bool use_angle)
 {
@@ -287,7 +306,7 @@ int LS01B::setMotorSpeed(int rpm)
   data[1] = 0x26;
   data[3] = (rpm & 0xff);
   data[2] = (rpm >> 8) & 0xff;
-  // printf("0x%x, 0x%x\n", data[2], data[3]);
+
   int rtn = serial_->send((const char *)data, 4);
   if (rtn < 0)
   {
@@ -367,6 +386,8 @@ bool LS01B::startCallback(std_srvs::SetBoolRequest &req, std_srvs::SetBoolRespon
     if (cmd){
       startScan();
       usleep(100000);
+      startScan();
+      usleep(100000);
       setScanMode(true);
       res.message = "bring up laser";
     }
@@ -400,8 +421,8 @@ bool LS01B::resServerCallback(ls01b_v2::resolution::Request &req,
     res.status = false;
     return true;
   }
-//  stopRecvData();   // stop sending data
-//  usleep(100);
+  stopRecvData();   // stop sending data
+  usleep(100);
   setResolution(resolution);
   usleep(100000);
   setResolution(resolution);
@@ -411,156 +432,222 @@ bool LS01B::resServerCallback(ls01b_v2::resolution::Request &req,
   serial_->flushinput();
   return true;
 }
+
 void LS01B::recvThread()
 {
-
   uint8_t start_count = 0;
+  unsigned int time = 0;
+  unsigned int total;
+  unsigned int Intercept;
+  unsigned int i;
+  int count;
+  int last_angle;
+  bool first_data = true;
+  bool link_fail = false;
   char header[6];
   uint8_t temp_char;
   char * packet_bytes = new char[data_len_];
+  char * all_bytes = new char[MAX_BUF];
   if (packet_bytes == NULL)
   {
     packet_bytes = NULL;
-    // printf("new char [data_len_] error \n");
   }
+  if (all_bytes == NULL)
+  {
+    all_bytes = NULL;
+  }
+  
   int cnt_switch_res_failed = 0;
   boost::posix_time::ptime t1,t2;
   t1 = boost::posix_time::microsec_clock::universal_time();
   while(!is_shutdown_&&ros::ok()){
+
     while(!is_start_){
       usleep(100000);
     }
-
+	
     bool is_health = this->isHealth();
+	
     if (!is_health)
     {
+		serial_->close();
       this->resetHealth();
       serial_ = LSIOSR::instance(serial_port_, baud_rate_);
+	  int code = serial_->init();
+	  if(code != 0)
+	  {
+		usleep(200000);
+		ROS_WARN("Serial open fail");
+		scan_health_ = -3;
+		continue;
+	  }
       usleep(100000);
       run();
       continue;
     }
+	
+	
+	if(first_data)
+	{ 
+		total = 0;
+		Intercept = 0;
+		i = 0;
+		while(true)
+		{
+			count = serial_->read(&all_bytes[0], 1);
 
-    int count = serial_->read(&header[start_count], 1);
-    if (count<=0)
-    {
-        ROS_DEBUG("read header[%d] error\n", start_count);
-      start_count = 0;
-      scan_health_ = -3;
-      continue;
-    }
+			if ((int)(all_bytes[0]&0xff) == 0xA5)
+			{
+				count = serial_->read(&all_bytes[1], 1);
+				if ((int)(all_bytes[1]&0xff) == 0x6A)
+				{
+					//all_bytes[0] = 0xA5;
+					//all_bytes[1] = 0x6A;
+					total = MAX_BUF - 2;
+					Intercept = 2;
+					i = 0;
+					break;
+				}
+			}
+			if(time > 8200) //lidar disconnected about 200ms
+			{
+				link_fail = true;
+				first_data = true;
+				time=0;
+				break;
+			}
+			
+			if(count <= 0) 
+				time++;
+			else
+				time = 0;
+		}
+		first_data = false;
+	}
+	
+	if(link_fail) 
+	{
+		link_fail = false;
+		scan_health_ = -3;
+		continue;
+	}
+	
+	count = serial_->read(all_bytes+i+Intercept, total-i);
+	if(time > 8200) //lidar disconnected about 200ms
+	{
+		time=0;
+		first_data = true;
+		scan_health_ = -3;
+		continue;
+	}
+	time++;	
 
-    if(0 == start_count){
-      if (0xA5 == (header[start_count]&0xff)){
-        start_count = 1;
-      }
-      else{
-        start_count = 0;
-      }
-    }
-    else if (1 == start_count) {
-      if (0x6A == (header[start_count]&0xff) || 0x5A == (header[start_count]&0xff))
-      {
-        if (0x6A == (header[start_count]&0xff))
-        {
-          t2 = boost::posix_time::microsec_clock::universal_time();
-          boost::posix_time::millisec_posix_time_system_config::time_duration_type t_elapse;
-          t_elapse = t2 - t1;
-          real_rpm_ = 1000000.0 / t_elapse.ticks();
+	if (count > 0){
+		time=0;
+		i += count;
 
-          t1 = t2;
+		//Read data until the entire array is full
+		if (i >= total){
+			//Find the header of the next data package to calculate the total length of the current data package
+			for(int k=1; k<MAX_BUF - 1; k++)
+			{
+				if((int)(all_bytes[k]&0xff) == 0xA5 && ((int)(all_bytes[k+1]&0xff) == 0x5A || (int)(all_bytes[k+1]&0xff) == 0x6A))
+				{
+					total = k;
+					break;
+				}
+			}
 
-          boost::unique_lock<boost::mutex> lock(mutex_);
-          scan_points_bak_.resize(scan_points_.size());
-          scan_points_bak_.assign(scan_points_.begin(), scan_points_.end());
-          pre_time_ = time_;
-          lock.unlock();
-          
-          pubscan_cond_.notify_one();
-          time_ = ros::Time::now();
-        }
+			rpm_ = ((all_bytes[2]&0x7f) << 8) + (all_bytes[3]&0xff);
+			int flag = ((all_bytes[2] & 0x80) == 0) ? 0 : 1;
+			int angular_resolution = (all_bytes[4]&0xff) >> 1;
+			int start_angle = ((all_bytes[4] & 0x01) << 8) + (all_bytes[5]&0xff);
+			
+			if(start_angle < last_angle)
+			{
+			  t2 = boost::posix_time::microsec_clock::universal_time();
+			  boost::posix_time::millisec_posix_time_system_config::time_duration_type t_elapse;
+			  t_elapse = t2 - t1;
+			  real_rpm_ = 1000000.0 / t_elapse.ticks();
+			  t1 = t2;
 
-        start_count = 2;
-        int count = serial_->read(&header[start_count], 4);
-        if (count != 4)
-        {
-           ROS_DEBUG("read header error\n");
-          start_count = 0;
-          scan_health_ = -3;
-          continue;
-        }
+			  boost::unique_lock<boost::mutex> lock(mutex_);
+			  scan_points_bak_.resize(scan_points_.size());
+			  scan_points_bak_.assign(scan_points_.begin(), scan_points_.end());
+			  pre_time_ = time_;
 
-        rpm_ = ((header[2]&0x7f) << 8) + (header[3]&0xff);
-        int flag = ((header[2] & 0x80) == 0) ? 0 : 1;
-        int angular_resolution = (header[4]&0xff) >> 1;
+			  lock.unlock();
+			  pubscan_cond_.notify_one();
+			  time_ = ros::Time::now();
+			}
+			last_angle = start_angle;
+			
+			/*if (angular_resolution/100.0 != resolution_)
+			{
+			  ROS_WARN("angular resolution is not ok yet current res %d", angular_resolution);
+			  usleep(100000);
 
-        int start_angle = ((header[4] & 0x01) << 8) + (header[5]&0xff);
-        if (angular_resolution/100.0 != resolution_)
-        {
-          ROS_WARN("angular resolution is not ok yet current res %d", angular_resolution);
-          usleep(100000);
-          cnt_switch_res_failed++;
-          if (cnt_switch_res_failed >= 10)
-          {
-              double tmp_res = resolution_;
-              ROS_FATAL("Laser switch resolution failed. Fallback");
-              setResolution(angular_resolution/100.0);
-              usleep(100000);
-              setResolution(tmp_res);
-              usleep(100000);
-              setScanMode(true);
-              usleep(100000);
-              cnt_switch_res_failed =0;
-          }
-          start_count = 0;
-          continue;
-        }
-        count = serial_->read(packet_bytes, data_len_);
-        if (count != data_len_)
-        {
-           ROS_DEBUG("read %d packet error. Only read %d data", data_len_, count);
-          start_count = 0;
-          if (count == 0)
-            scan_health_ = -3;
-          continue;
-        }
+				time=0;
+				first_data = true;
+				scan_health_ = -3;
+				continue;
+			}*/
 
-        for (int i = 0; i < data_len_; i = i+3)
-        {
-          // printf("%02X %02X %02X \n", (packet_bytes[i]) & 0xFF, (packet_bytes[i+1]) & 0xFF, (packet_bytes[i+2]) & 0xFF);
-          int idx = start_angle / resolution_ + i/3;
-          double distance = ((packet_bytes[i+1] & 0xFF) << 8) | (packet_bytes[i+2] & 0xFF);         
-          // double degree = start_angle + (packet_bytes[i] & 0xFF )* resolution_;
-          double degree = start_angle + idx * resolution_;
+			int len = total-6;
+			if(len < 0) 
+			{
+				len = 0;
+			}
+			if(len > 180) 
+			{
+				len = 180;
+			}
+			memset(packet_bytes, 0, data_len_);
+			memcpy(packet_bytes, all_bytes+6, len);
+			
+			
+			for (int i = 0; i < len; i = i+3)
+			{
+			  int idx = start_angle / resolution_ + i/3;
+			  if(idx > 1439) 
+			  {
+				  continue;
+			  }
+			  
+			  double distance = ((packet_bytes[i+1] & 0xFF) << 8) | (packet_bytes[i+2] & 0xFF);         
+			  double degree = idx * resolution_;
 
-          boost::unique_lock<boost::mutex> lock(mutex_);
-          scan_points_[idx].degree = degree;
-          scan_points_[idx].range = distance/1000.0;
-          if(use_angle_)
-          {
-            scan_points_[idx].intensity = 0;
-          }
-          else
-          {
-            scan_points_[idx].intensity = packet_bytes[i] & 0xFF;
-          }
-          lock.unlock();
-        }
+			  boost::unique_lock<boost::mutex> lock(mutex_);
+			  scan_points_[idx].degree = degree;
+			  scan_points_[idx].range = distance/1000.0;
+			  if(use_angle_)
+			  {
+				scan_points_[idx].intensity = 0;
+			  }
+			  else
+			  {
+				scan_points_[idx].intensity = packet_bytes[i] & 0xFF;
+			  }
+			  lock.unlock();
+			}
+			
+			Intercept = MAX_BUF - total;
 
-        start_count = 0;
-
-      }
-      else{
-        start_count = 0;
-      }
-
-    }
+			//Remove the parsed data part from the array
+			memcpy(all_bytes, all_bytes+total, Intercept);
+			i = 0;
+		}
+	}
   }
-
   if (packet_bytes)
   {
     packet_bytes = NULL;
     delete packet_bytes;
+  }
+  if (all_bytes)
+  {
+    all_bytes = NULL;
+    delete all_bytes;
   }
 }
 
@@ -579,7 +666,7 @@ void LS01B::pubScanThread()
   {
     while (wait_for_wake)
     {
-      // ROS_WARN("pubScanThread thread is suspending");
+      //ROS_WARN("pubScanThread thread is suspending");
       pubscan_cond_.wait(lock);
       wait_for_wake = false;
     }
@@ -661,7 +748,6 @@ void LS01B::pubScanThread()
           }
         }
       }
-
     }
     pub_.publish(msg);
     // ROS_INFO("getRPM = %f", getRPM());
@@ -676,6 +762,8 @@ void LS01B::run()
   setMotorSpeed(rpm_);
   usleep(100000);
   switchData(false);
+  usleep(100000);
+  startScan();
   usleep(100000);
   startScan();
   usleep(100000);

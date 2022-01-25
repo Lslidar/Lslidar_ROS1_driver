@@ -91,7 +91,7 @@ public:
      * stop recv data from lidar
      */
     int stopRecvData();
-
+	
     /**
      * switch angle or intensity in recv data
      * use_angle: true. the angle is chosed

@@ -80,7 +80,7 @@ private:
   int setOpt(int nBits, uint8_t nEvent, int nStop);
 
   std::string port_;
-
+  FILE *fp;
   int baud_rate_;
 
   int fd_;

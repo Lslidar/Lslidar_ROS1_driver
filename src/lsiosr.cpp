@@ -135,7 +135,9 @@ int LSIOSR::read(char *buffer, int length, int timeout)
 
   int	totalBytesRead = 0;
   int rc;
+  int unlink = 0;
   char* pb = buffer;
+
   if (timeout > 0)
   {
     rc = waitReadable(timeout);
@@ -148,8 +150,9 @@ int LSIOSR::read(char *buffer, int length, int timeout)
     while (length > 0)
     {
       rc = ::read(fd_, pb, (size_t)length);
+	  //printf("LSIOSR1::%d\n", rc);
       if (rc > 0)
-      {
+      {	
         length -= rc;
         pb += rc;
         totalBytesRead += rc;
@@ -168,8 +171,11 @@ int LSIOSR::read(char *buffer, int length, int timeout)
           break;
         }
       }
-
+	  unlink++;
       rc = waitReadable(20);
+	  if(unlink > 10)
+		  return -1;
+	  
       if (rc <= 0)
       {
         break;
@@ -179,6 +185,7 @@ int LSIOSR::read(char *buffer, int length, int timeout)
   else
   {
     rc = ::read(fd_, pb, (size_t)length);
+	//printf("LSIOSR::%d\n", rc);
     if (rc > 0)
     {
       totalBytesRead += rc;
@@ -189,7 +196,6 @@ int LSIOSR::read(char *buffer, int length, int timeout)
       return -1;
     }
   }
-
   if(0)
   {
     printf("Serial Rx: ");
@@ -385,22 +391,20 @@ int LSIOSR::send(const char* buffer, int length, int timeout)
 
 int LSIOSR::init()
 {
-  int error_code = 0;
+	int error_code = 0;
 
-  fd_ = open(port_.c_str(), O_RDWR|O_NOCTTY|O_NDELAY);
-  if (0 < fd_)
-  {
-    error_code = 0;
-    setOpt(DATA_BIT_8, PARITY_NONE, STOP_BIT_1);//设置串口参数
-    printf("open_port %s , fd %d OK !\n", port_.c_str(), fd_);
-  }
-  else
-  {
-    error_code = -1;
-    printf("open_port %s ERROR !\n", port_.c_str());
-  }
-  printf("LSIOSR::Init\n");
-
+	fd_ = open(port_.c_str(), O_RDWR|O_NOCTTY|O_NDELAY);
+	if (0 < fd_)
+	{
+		error_code = 0;
+		setOpt(DATA_BIT_8, PARITY_NONE, STOP_BIT_1);//设置串口参数
+		printf("open_port %s , fd %d OK !\n", port_.c_str(), fd_);
+	}
+	else
+	{
+		error_code = -1;
+		//printf("open_port %s ERROR !\n", port_.c_str());
+	}
   return error_code;
 }
 
