@@ -1,0 +1,8 @@
+停止扫描命令：
+	rostopic pub /startOrStop std_msgs/Int32 "data: 1"
+
+停止电机命令（停止电机也会停止扫描）:
+	rostopic pub /startOrStop std_msgs/Int32 "data: 2"
+
+开始扫描（先开电机，再开扫描）：
+	rostopic pub /startOrStop std_msgs/Int32 "data: 4"
