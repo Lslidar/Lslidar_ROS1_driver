@@ -62,10 +62,22 @@ Linux/Mac: `git clone -b CH16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
 Windows: `git clone --branch CH16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
+
+### CH32-G_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH32-G_v1.0)
+Linux/Mac: `git clone -b CH32-G_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch CH32-G_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### CH32-G_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH32-G_v2.0)
+Linux/Mac: `git clone -b CH32-G_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch CH32-G_v2.0 https://github.com/Lslidar/lslidar_ros.git`
+
 ### CH32_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH32_v1.0)
 Linux/Mac: `git clone -b CH32_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
 Windows: `git clone --branch CH32_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
 
 ### CH32_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH32_v2.0)
 Linux/Mac: `git clone -b CH32_v2.0 https://github.com/Lslidar/lslidar_ros.git`
@@ -87,6 +99,10 @@ Linux/Mac: `git clone -b CH114_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
 Windows: `git clone --branch CH114_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
+### CH120_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH120_v1.0)
+Linux/Mac: `git clone -b CH120_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch CH120_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
 ### CH128_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/CH128_v2.0)
 Linux/Mac: `git clone -b CH128_v2.0 https://github.com/Lslidar/lslidar_ros.git`
@@ -98,6 +114,55 @@ Linux/Mac: `git clone -b CH128x1_v1.0 https://github.com/Lslidar/lslidar_ros.git
 
 Windows: `git clone --branch CH128x1_v1.0 https://github.com/Lslidar/lslidar_ros.git`
 
+### HS1_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/HS1_v1.0)
+Linux/Mac: `git clone -b HS1_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch HS1_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### HS4_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/HS4_v1.0)
+Linux/Mac: `git clone -b HS4_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch HS4_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### Ls01b_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/Ls01b_v1.0)
+Linux/Mac: `git clone -b Ls01b_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch Ls01b_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### Ls01d_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/Ls01d_v1.0)
+Linux/Mac: `git clone -b Ls01d_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch Ls01d_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### M10_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/M10_v1.0)
+Linux/Mac: `git clone -b M10_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch M10_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### M10_net_v1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/M10_net_v1.0)
+Linux/Mac: `git clone -b M10_net_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch M10_net_v1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### MS-C16_V1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/MS-C16_V1.0)
+Linux/Mac: `git clone -b MS-C16_V1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch MS-C16_V1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### MS-CH32_V1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/MS-CH32_V1.0)
+Linux/Mac: `git clone -b MS-CH32_V1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch MS-CH32_V1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### N10_V1.0 [link](https://github.com/Lslidar/lslidar_ros/tree/N10_V1.0)
+Linux/Mac: `git clone -b N10_V1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch N10_V1.0 https://github.com/Lslidar/lslidar_ros.git`
+
+### N301-P [link](https://github.com/Lslidar/lslidar_ros/tree/N301-P)
+Linux/Mac: `git clone -b N301-P https://github.com/Lslidar/lslidar_ros.git`
+
+Windows: `git clone --branch N301-P https://github.com/Lslidar/lslidar_ros.git`
 FAQ
 ----
 
