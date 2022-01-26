@@ -21,7 +21,8 @@ Ubuntu 18.04 Melodic
 
 1. Power the lidar via the included adapter
 2. Connect the lidar to an Ethernet port on your computer.
-3. Assign the computer IP based on the default DEST IP `192.168.1.102.` <br>`sudo ifconfig eth0 192.168.1.102`（eth0 is the network card name ）<br>
+3. Assign the computer IP based on the default DEST IP `192.168.1.102.`
+`sudo ifconfig eth0 192.168.1.102`（eth0 is the network card name ）
 
 ## Compiling
 
@@ -40,7 +41,7 @@ source devel/setup.bash
 1. Launch the provided pointcloud generation launch file.
 
 ```
-roslaunch lslidar_ch_decoder lslidar_ch.launch
+roslaunch lslidar_ch128_decoder lslidar_ch.launch
 ```
 
 1. Launch rviz, with the "laser_link" frame as the fixed frame.
