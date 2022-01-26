@@ -28,11 +28,11 @@ Ubuntu 18.04 Melodic
 This is a Catkin package. Make sure the package is on `ROS_PACKAGE_PATH`  after cloning the package to your workspace. And the normal procedure for compiling a catkin package will work.
 
 ```
-cd your_work_space<br>
-cd src<br>
-git clone –b Ls01d_v1.0 https://github.com/lsLIDAR/lslidar_ros/Ls01d_v1.0<br>
-catkin_make<br>
-source devel/setup.bash/<br>
+cd your_work_space
+cd src
+git clone –b Ls01d_v1.0 https://github.com/Lslidar/lslidar_ros
+catkin_make
+source devel/setup.bash
 ```
 
 ## View Data
@@ -40,7 +40,7 @@ source devel/setup.bash/<br>
 1. Launch the provided pointcloud generation launch file.
 
 ```
-roslaunch Ls01d_v2 Ls01d_v2.launch
+roslaunch ls01d ls01d.launch
 ```
 
 1. Launch rviz, with the "laser_link" frame as the fixed frame.
