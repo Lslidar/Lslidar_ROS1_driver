@@ -186,5 +186,6 @@ Techinical Support
 ----
 Any more question please commit an issue
 
-Or contact support@lslidar.com
+you can contact support@lslidar.com
+or Enter our live chat window
 [Customer service entrance](https://1893520.s5.udesk.cn/im_client/?web_plugin_id=502)
