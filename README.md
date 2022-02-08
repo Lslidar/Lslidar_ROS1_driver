@@ -176,7 +176,9 @@ Windows: `git clone --branch N401-P https://github.com/Lslidar/lslidar_ros.git`
 
 ### N401-V3.0 [link](https://github.com/Lslidar/lslidar_ros/tree/N401_V3.0)
 Linux/Mac: `git clone -b N401-V3.0 https://github.com/Lslidar/lslidar_ros.git`
+
 Windows: `git clone --branch N401-V3.0 https://github.com/Lslidar/lslidar_ros.git`
+
 FAQ
 ----
 
