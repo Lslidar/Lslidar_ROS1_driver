@@ -31,7 +31,7 @@ _**Operation Instructions:** To access the operation intructions, please click o
 
 _**Clone:** To clone each Lidar's repository, please copy and paste the corresponding code in the terminal_
 
-### <img src="C:\Users\Administrator\Desktop\雷达高清抠图\C16.png" alt="C16" style="zoom:4%;" />C16_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/C16_v2.0)
+### <img src="https://github.com/Lslidar/lslidar_ros/blob/master/image/C16.png" alt="C16" style="zoom:4%;" />C16_v2.0 [link](https://github.com/Lslidar/lslidar_ros/tree/C16_v2.0)
 
 Linux/Mac: `git clone -b C16_v2.0 https://github.com/Lslidar/lslidar_ros.git`
 
