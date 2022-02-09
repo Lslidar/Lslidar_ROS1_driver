@@ -1,5 +1,8 @@
+
+<img src="https://github.com/Lslidar/lslidar_ros/blob/master/image/%E7%94%BB%E6%9D%BF%201%404x-100(1).jpg" width="1500px" />
+
 # Instructions
-[Customer service entrance](https://1893520.s5.udesk.cn/im_client/?web_plugin_id=502)
+[LEISHEN-Lidar](http://www.lslidar.com/)
 ## Preparation
 
 ### Supported Operating System
