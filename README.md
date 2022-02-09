@@ -6,7 +6,7 @@ ROS Installation
 Before starting this turorial, please complete installation . This tutorial assumes that Ubuntu is being used.
 
 # lslidar_ch120_V1.0
-
+[Customer service entrance](https://1893520.s5.udesk.cn/im_client/?web_plugin_id=502)
 ## Description
 
 The `lslidar_ch120_v1.0` package is a linux ROS driver for lslidar CH120_ V1.0.
@@ -150,9 +150,9 @@ Note that this launch file launches both the driver and the decoder, which is th
 
 Any more question please commit an issue.
 
-Or connect support@lslidar.com
-
-
+you can contact support@lslidar.com
+or Enter our live chat window
+[Customer service entrance](https://1893520.s5.udesk.cn/im_client/?web_plugin_id=502)
 
 
 
