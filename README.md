@@ -1,8 +1,8 @@
 
-<img src="https://github.com/Lslidar/lslidar_ros/blob/master/image/%E7%94%BB%E6%9D%BF%201%404x-100(1).jpg" width="1500px" />
+<img src="https://github.com/Lslidar/lslidar_ros/blob/master/image/%E7%94%BB%E6%9D%BF%201%404x-100(1).jpg" width="1200px" />
 
 # Instructions
-[LEISHEN-Lidar](http://www.lslidar.com/)
+[LEISHEN-Lidar Offical](http://www.lslidar.com/)
 ## Preparation
 
 ### Supported Operating System
