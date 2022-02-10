@@ -190,4 +190,4 @@ Any more question please commit an issue
 
 you can contact support@lslidar.com
 or Enter our live chat window
-[Customer service entrance](https://1893520.s5.udesk.cn/im_client/?web_plugin_id=502)
+[Customer service entrance](https://1893520.s5.udesk.cn/im_client/?web_plugin_id=502&language=en-us)
