@@ -1,0 +1,78 @@
+<launch>
+
+  <node pkg="lslidar_m10_driver" type="lslidar_m10_driver_node" name="lslidar_m10_driver_node" output="screen" ns="frist">
+    <param name="frame_id" value="laser_link"/>                     #激光坐标
+    <param name="device_ip" value="192.168.1.200"/>                 #雷达IP
+    <param name="device_port" value="2368"/>                        #雷达端口
+    <param name="difop_ip" value="192.168.1.102"/>                  #接收端IP
+    <param name="difop_port" value="2369"/>                         #接收端端口
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+
+  <node pkg="lslidar_m10_decoder" type="lslidar_m10_decoder_node" name="lslidar_m10_decoder_node" output="screen" ns="frisr">
+    <param name="child_frame_id" value="laser_link"/>               #激光坐标
+    <param name="scan_topic" value="scan"/>                         #设置激光数据topic名称
+    <param name="angle_disable_min" value="0.0"/>                   #角度裁剪开始值
+    <param name="angle_disable_max" value="0.0"/>                   #角度裁剪结束值
+    <param name="min_range" value="0"/>                             #雷达接收距离最小值
+    <param name="max_range" value="100.0"/>                         #雷达接收距离最大值
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+
+  <node pkg="lslidar_m10_driver" type="lslidar_m10_driver_node" name="lslidar_m10_driver_node" output="screen" ns="second">
+    <param name="frame_id" value="laser_link"/>                     #激光坐标
+    <param name="device_ip" value="192.168.1.200"/>                 #雷达IP
+    <param name="device_port" value="2368"/>                        #雷达端口
+    <param name="difop_ip" value="192.168.1.102"/>                  #接收端IP
+    <param name="difop_port" value="2369"/>                         #接收端端口
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+
+  <node pkg="lslidar_m10_decoder" type="lslidar_m10_decoder_node" name="lslidar_m10_decoder_node" output="screen" ns="second">
+    <param name="child_frame_id" value="laser_link"/>               #激光坐标
+    <param name="scan_topic" value="scan"/>                         #设置激光数据topic名称
+    <param name="angle_disable_min" value="0.0"/>                   #角度裁剪开始值
+    <param name="angle_disable_max" value="0.0"/>                   #角度裁剪结束值
+    <param name="min_range" value="0"/>                             #雷达接收距离最小值
+    <param name="max_range" value="100.0"/>                         #雷达接收距离最大值
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+
+  <node pkg="lslidar_m10_driver" type="lslidar_m10_driver_node" name="lslidar_m10_driver_node" output="screen" ns="thirdly">
+    <param name="frame_id" value="laser_link"/>                     #激光坐标
+    <param name="device_ip" value="192.168.1.200"/>                 #雷达IP
+    <param name="device_port" value="2368"/>                        #雷达端口
+    <param name="difop_ip" value="192.168.1.102"/>                  #接收端IP
+    <param name="difop_port" value="2369"/>                         #接收端端口
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+
+  <node pkg="lslidar_m10_decoder" type="lslidar_m10_decoder_node" name="lslidar_m10_decoder_node" output="screen" ns="thirdly">
+    <param name="child_frame_id" value="laser_link"/>               #激光坐标
+    <param name="scan_topic" value="scan"/>                         #设置激光数据topic名称
+    <param name="angle_disable_min" value="0.0"/>                   #角度裁剪开始值
+    <param name="angle_disable_max" value="0.0"/>                   #角度裁剪结束值
+    <param name="min_range" value="0"/>                             #雷达接收距离最小值
+    <param name="max_range" value="100.0"/>                         #雷达接收距离最大值
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+
+  <node pkg="lslidar_m10_driver" type="lslidar_m10_driver_node" name="lslidar_m10_driver_node" output="screen" ns="fourthly">
+    <param name="frame_id" value="laser_link"/>                     #激光坐标
+    <param name="device_ip" value="192.168.1.200"/>                 #雷达IP
+    <param name="device_port" value="2368"/>                        #雷达端口
+    <param name="difop_ip" value="192.168.1.102"/>                  #接收端IP
+    <param name="difop_port" value="2369"/>                         #接收端端口
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+
+  <node pkg="lslidar_m10_decoder" type="lslidar_m10_decoder_node" name="lslidar_m10_decoder_node" output="screen" ns="fourthly">
+    <param name="child_frame_id" value="laser_link"/>               #激光坐标
+    <param name="scan_topic" value="scan"/>                         #设置激光数据topic名称
+    <param name="angle_disable_min" value="0.0"/>                   #角度裁剪开始值
+    <param name="angle_disable_max" value="0.0"/>                   #角度裁剪结束值
+    <param name="min_range" value="0"/>                             #雷达接收距离最小值
+    <param name="max_range" value="100.0"/>                         #雷达接收距离最大值
+    <param name="versions" value="2"/>                              #协议选择: 1 : 1.1协议  / 2 : 1.3.2协议 / 3 : 1.4.0协议
+  </node>
+</launch>

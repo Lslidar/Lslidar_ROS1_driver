@@ -1,0 +1,25 @@
+<package>
+
+  <name>lslidar_m10_driver</name>
+  <version>1.2.0</version>
+  <description>
+    ROS device driver for Leishen M10 lidar.
+  </description>
+  <maintainer email="shaohuashu@lslidar.com">Nick Shu</maintainer>
+  <author>Nick Shu</author>
+  <license>GNU General Public License V3.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>diagnostic_updater</build_depend>
+  <build_depend>nodelet</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>lslidar_m10_msgs</build_depend>
+
+  <run_depend>diagnostic_updater</run_depend>
+  <run_depend>nodelet</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>lslidar_m10_msgs</run_depend>
+
+
+</package>
