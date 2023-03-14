@@ -40,11 +40,21 @@ _**Clone:** To clone each Lidar's repository, please copy and paste the correspo
 
 
 
-### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/LS180S1.png" width="50px" />LS128S1/LS128S2 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS128S1/LS128S2)
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/LS180S1.png" width="50px" />LS128/180/400S1 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS128/180/400S1)
 
-Linux/Mac: `git clone -b LS128S1/LS128S2 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Linux/Mac: `git clone -b LS128/180/400S1 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-Windows: `git clone --branch LS128S1/LS128S2 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Windows: `git clone --branch LS128/180/400S1 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+
+
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/LS128S2.png" width="50px" />LS128/180/400S2 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS128/180/400S2)
+
+Linux/Mac: `git clone -b LS128/180/400S2 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+Windows: `git clone --branch LS128/180/400S2 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+
 
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C16.png" width="50px" />C1_v4.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C1_v4.0)
@@ -83,6 +93,8 @@ Windows: `git clone --branch C32W_v4.0 https://github.com/Lslidar/Lslidar_ROS1_d
 Linux/Mac: `git clone -b CH32R_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 Windows: `git clone --branch CH32R_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+
 
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/CH64W.png" width="50px" />CH1W [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/CH1W)
@@ -128,11 +140,15 @@ Linux/Mac: `git clone -b CX128S2 https://github.com/Lslidar/Lslidar_ROS1_driver.
 
 Windows: `git clone --branch CX128S2 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
+
+
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/HS1.png" width="50px" />HS1 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/HS1)
 
 Linux/Mac: `git clone -b HS1 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 Windows: `git clone --branch HS1 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/M10P.png" width="50px" />M10/N10 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/M10/N10)
 
