@@ -1,0 +1,37 @@
+<launch>
+  <arg name="device_ip" default="192.168.1.200" />
+  <arg name="msop_port" default="2368" />
+  <arg name="difop_port" default="2369" />
+  <arg name="pcl_type" default="false"/>
+  <arg name="use_time_service" default="true" />
+
+  <node pkg="lslidar_ch1w_driver" type="lslidar_ch1w_driver_node" name="lslidar_ch1w_driver_node" output="screen">
+    <!--param name="pcap" value="$(find lslidar_ch1w_driver)/pcap/111.pcap"/-->
+    <param name="lidar_ip" value="$(arg device_ip)"/>
+    <param name="msop_port" value="$(arg msop_port)" />
+    <param name="difop_port" value="$(arg difop_port)"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.2"/>
+    <param name="read_once" value="false"/>
+    <param name="read_fast" value="false"/>
+    <param name="repeat_delay" value="0.0"/>
+    <param name="use_time_service" value="$(arg use_time_service)"/>
+  </node>
+
+  <node pkg="lslidar_ch1w_decoder" type="lslidar_ch1w_decoder_node" name="lslidar_ch1w_decoder_node" output="screen">
+    <param name="frame_id" value="laser_link"/>
+    <param name="pcl_type" value="$(arg pcl_type)"/>
+    <param name="min_range" value="0.15"/>
+    <param name="max_range" value="150.0"/>
+    <param name="angle_disable_min" value="0"/>       <!-- 0-180度  !-->
+    <param name="angle_disable_max" value="0"/>     <!-- 0-180度  !-->
+    <param name="pointcloud_topic" value="lslidar_point_cloud"/>
+    <param name="frequency" value="10"/>
+    <param name="pulse_repetition_rate" value="60.0"/>
+    <param name="publish_point_cloud" value="true"/>
+    <param name="publish_laserscan" value="true"/>
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find lslidar_ch1w_decoder)/rviz/lslidar_ch.rviz" output="screen"/>
+ <!--node pkg="tf" type="static_transform_publisher" name="laser_link_to_world" args="0 0 1 0 0 0 world laser_link 100" /-->
+</launch>
