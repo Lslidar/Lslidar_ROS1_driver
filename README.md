@@ -55,6 +55,10 @@ Linux/Mac: `git clone -b C32_v3.0 https://github.com/Lslidar/Lslidar_ROS1_driver
 
 Windows: `git clone --branch C32_v3.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
+
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C32W.png" width="50px" />C32W [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C32_v2.6)
+Linux/Mac: `git clone -b C32_v2.6 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/CH64%2032%2016.png" width="50px" />CH16_v2.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/CH16_v2.0)
 Linux/Mac: `git clone -b CH16_v2.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
