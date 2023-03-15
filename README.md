@@ -69,34 +69,34 @@ Windows: `git clone --branch C32_V2.6/2.8/3.0 https://github.com/Lslidar/Lslidar
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C16.png" width="50px" />C1_v4.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C1_v4.0)
 
-Linux/Mac: `git clone -b C1_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Linux/Mac: `git clone -b C1_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-Windows: `git clone --branch C1_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Windows: `git clone --branch C1_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C16.png" width="50px" />C8_v4.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C8_v4.0)
 
-Linux/Mac: `git clone -b C8_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Linux/Mac: `git clone -b C8_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-Windows: `git clone --branch C8_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Windows: `git clone --branch C8_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C16.png" width="50px" />C16_v4.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C32_v2.6)
 
-Linux/Mac: `git clone -b C16_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Linux/Mac: `git clone -b C16_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-Windows: `git clone --branch C16_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Windows: `git clone --branch C16_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C16.png" width="50px" />C32_v4.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C32_v3.0)
 
-Linux/Mac: `git clone -b C32_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Linux/Mac: `git clone -b C32_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-Windows: `git clone --branch C32_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Windows: `git clone --branch C32_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C32W.png" width="50px" />C32W_v4.0[link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C32W_v4.0)
 
-Linux/Mac: `git clone -b C32W_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Linux/Mac: `git clone -b C32W_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-Windows: `git clone --branch C32W_v4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Windows: `git clone --branch C32W_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/CH32R.png" width="50px" />CH32R_V4.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/CH32R_V4.0)
 
