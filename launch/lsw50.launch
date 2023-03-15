@@ -1,0 +1,13 @@
+<launch>
+    <node name="lsw50" pkg="lsw50" type="lsw50" output="screen">
+        <param name="scan_topic" value="scan"/>         #设置激光数据topic名称
+        <param name="frame_id" value="laser_link"/>     #激光坐标
+        <param name="serial_port" value="/dev/ttyUSB0"/>  #雷达连接的串口
+        <param name="baud_rate" value="921600" />        #雷达连接的串口波特率
+	<param name="angle_disable_min" value="0.0"/>           #雷达裁剪角度开始值 
+	<param name="angle_disable_max" value="0.0"/>           #雷达裁剪角度结束值 
+	<param name="min_range" value="0.0"/>                   #雷达点云距离最小值
+	<param name="max_range" value="100.0"/>                 #雷达点云距离最大值
+    </node>
+      <node name="rviz" pkg="rviz" type="rviz" args="-d $(find lsw50)/rviz/default.rviz" output="screen"/>      #雷达点云配置
+</launch>
