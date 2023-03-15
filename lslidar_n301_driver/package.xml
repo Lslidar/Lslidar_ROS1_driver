@@ -1,0 +1,29 @@
+<package>
+
+  <name>lslidar_n301_driver</name>
+  <version>1.2.0</version>
+  <description>
+    Point cloud conversions for Leishen N301 LIDARs.
+  </description>
+  <maintainer email="lihonghang@lslidar.com">HANG</maintainer>
+  <author>HANG</author>
+  <license>GNU General Public License V3.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>diagnostic_updater</build_depend>
+  <build_depend>nodelet</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>lslidar_n301_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>libpcl-all</build_depend>
+  
+  <run_depend>diagnostic_updater</run_depend>
+  <run_depend>nodelet</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>lslidar_n301_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>libpcl-all-dev</run_depend>
+  <run_depend>libpcl-all</run_depend>
+</package>

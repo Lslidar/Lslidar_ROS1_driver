@@ -1,0 +1,22 @@
+<package>
+
+  <name>lslidar_n301</name>
+  <version>1.2.0</version>
+  <description>
+    Basic ROS support for the Leishen N301 LIDARs.
+  </description>
+  <maintainer email="shaohuashu@lslidar.com">Nick Shu</maintainer>
+  <author>Nick Shu</author>
+  <license>GNU General Public License V3.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>lslidar_n301_driver</run_depend>
+  <run_depend>lslidar_n301_msgs</run_depend>
+
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>

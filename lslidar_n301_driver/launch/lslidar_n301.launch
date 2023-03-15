@@ -1,0 +1,24 @@
+<launch>
+
+  <node pkg="lslidar_n301_driver" type="lslidar_n301_driver_node" name="lslidar_n301_driver_node" output="screen">
+    <param name="device_ip" value="192.168.1.222"/>
+    <param name="msop_port" value="2368"/>
+    <param name="difop_port" value="2369"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.2"/>
+    <param name="agreement_type" value="1"/>    <!--  1-1.7协议   2-1.6协议   -->
+  
+    <param name="child_frame_id" value="laser_link"/>
+    <param name="point_num" value="2000"/>
+    <param name="start_angle" value="240"/>
+    <param name="end_angle" value="120"/>
+    <param name="min_range" value="0.0"/>
+    <param name="max_range" value="100.0"/>
+    <param name="use_gps_ts" value="false"/>
+     <!--param name="pcap" value="$(find lslidar_n301_driver)/pcap/3.pcap"/-->
+
+  </node>
+  
+  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find lslidar_n301_driver)/rviz/lslidar_n301.rviz" output="screen"/-->
+
+</launch>

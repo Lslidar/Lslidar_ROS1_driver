@@ -1,0 +1,20 @@
+<package>
+
+  <name>lslidar_n301_msgs</name>
+  <version>1.2.0</version>
+  <description>
+    ROS message definitions for Leishen N301 LIDARs.
+  </description>
+  <maintainer email="shaohuashu@lslidar.com">Nick Shu</maintainer>
+  <author>Nick Shu</author>
+  <license>GNU General Public License V3.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+</package>
