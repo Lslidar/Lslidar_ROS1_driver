@@ -1,0 +1,92 @@
+
+
+<launch>
+  <arg name="device_ip1" default="192.168.1.200" />
+  <arg name="msop_port1" default="2368"/>
+  <arg name="difop_port1" default="2369"/>
+  <arg name="device_ip2" default="192.168.1.201" />
+  <arg name="msop_port2" default="2370"/>
+  <arg name="difop_port2" default="2371"/>
+  <arg name="use_gps_ts" default="false" />
+  <arg name="pcl_type" default="false" />
+  <!--c16表示机械式16线雷达；c32表示机械式32线雷达 -->
+  <arg name="lidar_type" default="c32"/>
+
+ <!--包长1206或1212 -->
+  <arg name="packet_size" default="1206"/>
+    <!--c16_2表示16线垂直角度分辨率为2度的雷达，c16_1表示16线垂直角度分辨率为1.33度的雷达 -->
+  <arg name="c16_type" default="c16_2"/>
+
+
+   <!--c32_2表示32线垂直角度分辨率为1度的雷达，c32_1表示32线垂直角度分辨率为0.33度的雷达 -->
+  <arg name="c32_type" default="c32_2"/>
+
+
+   <!--3表示32线fpga为2.7\2.8\3.0的版本的雷达，2表示32线fpga为2.6的版本的雷达-->
+  <arg name = "c32_fpga_type" default="3"/>
+
+
+  <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="c32_1">
+    <!--param name="pcap" value="$(find lslidar_driver)/pcap/xxx.pcap" /-->
+    <param name="device_ip" value="$(arg device_ip1)" />
+    <param name="msop_port" value="$(arg msop_port1)" />
+    <param name="difop_port" value="$(arg difop_port1)"/>
+    <param name="lidar_type" value="$(arg lidar_type)"/>
+     <param name="packet_size" value="$(arg packet_size)"/>
+    <param name="pcl_type" value="$(arg pcl_type)"/>
+    <param name="c16_type" value="$(arg c16_type)"/>
+    <param name="c32_type" value="$(arg c32_type)"/>
+    <param name="c32_fpga_type" value="$(arg c32_fpga_type)"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.2"/>
+    <param name="use_gps_ts" value="$(arg use_gps_ts)"/>
+    <param name="min_range" value="0.15"/>
+    <param name="max_range" value="150.0"/>
+    <param name="horizontal_angle_resolution" value="0.18"/>
+    <param name="frame_id" value="laser_link_left"/>
+    <param name="distance_unit" value="0.40"/>
+    <param name="angle_disable_min" value="0"/>
+    <param name="angle_disable_max" value="0"/>
+    <param name="packet_rate" value="1700"/>
+    <param name="scan_num" value="10"/>
+    <param name="publish_scan" value="false"/>
+    <param name="pointcloud_topic" value="lslidar_point_cloud"/>
+    <param name="coordinate_opt" value="false"/>
+  </node>
+
+    <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="c32_2">
+      <!--param name="pcap" value="$(find lslidar_driver)/pcap/xxx.pcap" /-->
+      <param name="device_ip" value="$(arg device_ip2)" />
+      <param name="msop_port" value="$(arg msop_port2)" />
+      <param name="difop_port" value="$(arg difop_port2)"/>
+      <param name="lidar_type" value="$(arg lidar_type)"/>
+       <param name="packet_size" value="$(arg packet_size)"/>
+      <param name="pcl_type" value="$(arg pcl_type)"/>
+      <param name="c16_type" value="$(arg c16_type)"/>
+      <param name="c32_type" value="$(arg c32_type)"/>
+      <param name="c32_fpga_type" value="$(arg c32_fpga_type)"/>
+      <param name="add_multicast" value="false"/>
+      <param name="group_ip" value="224.1.1.2"/>
+      <param name="use_gps_ts" value="$(arg use_gps_ts)"/>
+      <param name="min_range" value="0.15"/>
+      <param name="max_range" value="150.0"/>
+      <param name="horizontal_angle_resolution" value="0.18"/>
+      <param name="frame_id" value="laser_link_right"/>
+      <param name="distance_unit" value="0.40"/>
+      <param name="angle_disable_min" value="0"/>
+      <param name="angle_disable_max" value="0"/>
+      <param name="packet_rate" value="1700"/>
+      <param name="scan_num" value="10"/>
+      <param name="publish_scan" value="false"/>
+      <param name="pointcloud_topic" value="lslidar_point_cloud"/>
+      <param name="coordinate_opt" value="false"/>
+    </node>
+
+  <!--node pkg="rviz" type="rviz" name="rviz" args="-d $(find lslidar_driver)/rviz_cfg/lslidar.rviz"/-->
+  <!--node pkg="tf" type="static_transform_publisher" name="laser_link_right_to_world" args="0 0 0 0 0 0 world laser_link_c16 100" /-->
+  <!--node pkg="tf" type="static_transform_publisher" name="laser_link_left_to_world" args="0 0 1 0 0 0 world laser_link_c32 100" /-->
+
+
+	
+ 
+</launch>
