@@ -193,7 +193,7 @@ Windows: `git clone --branch W_Series_V5.0 https://github.com/Lslidar/Lslidar_RO
 FAQ
 ----
 
-Techinical Support
+Technical Support
 ----
 
 Any more question please commit an issue
