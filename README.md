@@ -165,6 +165,12 @@ Linux/Mac: `git clone -b N0_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.
 
 Windows: `git clone --branch N10_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/M10P.png" width="50px" />M10P/N10P [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/M10P/N10P)
+
+Linux/Mac: `git clone -b M10P/N10P https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+Windows: `git clone --branch M10P/N10P https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/N401-P.png" width="50px" />N301-P_V5.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/N301-P_V5.0)
 
 Linux/Mac: `git clone -b N301-P_V5.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
