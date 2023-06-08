@@ -153,7 +153,7 @@ Linux/Mac: `git clone -b CX128S2 https://github.com/Lslidar/Lslidar_ROS1_driver.
 
 Windows: `git clone --branch CX128S2 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/CX126S3.png" width="10px" />CX126S3 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/CX126S3.png)
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/CX126S3.png" width="50px" />CX126S3 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/CX126S3.png)
 
 Linux/Mac: `git clone -b CX126S3 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
