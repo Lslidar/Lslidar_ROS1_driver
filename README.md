@@ -47,11 +47,17 @@ Windows: `git clone --branch LS128/180/400S1_V1.0 https://github.com/Lslidar/Lsl
 
 
 
-### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/LS128S2.png" width="50px" />LS128/180/400S2_V1.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS128/180/400S2_V1.0)
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/LS128S2.png" width="50px" />LS128/180/320/400S2_V1.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS128/180/400S2_V1.0)
 
 Linux/Mac: `git clone -b LS128/180/400S2_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-Windows: `git clone --branch LS128/180/400S2_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Windows: `git clone --branch LS128/180/320/400S2_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+###  <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/Terminator%201.png" width="50px" />Terminator-1_V1.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/Terminator-1_V1.0)
+
+Linux/Mac: `git clone -b Terminator-1_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+
+Windows: `git clone --branch Terminator-1_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 ### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C16-V3.0.png" width="50px" />C16_V2.6/2.8/3.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C16_V2.6/2.8/3.0)
 
@@ -213,7 +219,7 @@ FAQ
 Technical Support
 ----
 
-Any more question please commit an issue
+Any more questions please commit an issue
 
 you can contact support@lslidar.com
 or Enter our live chat window
