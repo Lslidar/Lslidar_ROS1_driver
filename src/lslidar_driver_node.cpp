@@ -1,0 +1,43 @@
+
+#include <ros/ros.h>
+#include "lslidar_driver/lslidar_driver.h"
+#include "std_msgs/String.h"
+#include <thread>
+
+using namespace lslidar_driver;
+volatile sig_atomic_t flag = 1;
+//std::string lidar_type;
+
+static void my_handler(int sig) {
+    flag = 0;
+}
+
+int main(int argc, char **argv) {
+    ros::init(argc, argv, "lslidar_driver");
+    ros::NodeHandle node;
+    ros::NodeHandle private_nh("~");
+
+    signal(SIGINT, my_handler);
+   // private_nh.param("lidar_type", lidar_type, std::string("c16"));
+   // ROS_INFO("lslidar type: %s", lidar_type.c_str());
+
+    lslidar_driver::LslidarDriver dvr(node, private_nh);
+    // loop until shut down or end of file
+    if (!dvr.initialize()) {
+        ROS_ERROR("cannot initialize lslidar driver.");
+        return 0;
+    }
+
+    std::thread poll_thread([&]() {
+                                while (ros::ok()) {
+                                    dvr.poll();
+                                    //ros::spinOnce();
+                                }
+                            }
+    );
+    poll_thread.detach();
+    ros::MultiThreadedSpinner spinner(4); // Use 4 threads
+    spinner.spin();
+
+    return 0;
+}
