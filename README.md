@@ -16,7 +16,7 @@ Ubuntu 18.04 + ROS Melodic
 
 [Ubuntu](http://wiki.ros.org/Installation/Ubuntu)
 
-_*Before starting this tutorial, please complete the installation. This tutotial assumes that Ubuntu is being used._
+_*Before starting this tutorial, please complete the installation. This tutorial assumes that Ubuntu is being used._
 
 ### Create a ROS workspace
 
@@ -25,7 +25,7 @@ _*Before starting this tutorial, please complete the installation. This tutotial
 ### Install Git and initialize it
 
 1. [Install Git](https://github.com/git-guides/install-git)
-2. Go into the destinated file via terminal, type **git init** to initialize git.
+2. Go into the destinated file via terminal, and type **git init** to initialize git.
 
 ```
 cd <your_work_space>
@@ -45,15 +45,13 @@ Linux/Mac: `git clone -b LS128/180/400S1_V1.0 https://github.com/Lslidar/Lslidar
 
 Windows: `git clone --branch LS128/180/400S1_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/LS128S2.png" width="50px" />LS128/180/320/400S2_V1.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS128/180/320/400S2_V1.0)
 
-
-### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/LS128S2.png" width="50px" />LS128/180/320/400S2_V1.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS128/180/400S2_V1.0)
-
-Linux/Mac: `git clone -b LS128/180/400S2_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
+Linux/Mac: `git clone -b LS128/180/320/400S2_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
 Windows: `git clone --branch LS128/180/320/400S2_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-###  <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/Terminator%201.png" width="50px" />LS180/320/400S3_V1.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/Terminator-1_V1.0)
+###  <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/Terminator%201.png" width="50px" />LS180/320/400S3_V1.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/LS180/320/400S3_V1.0)
 
 Linux/Mac: `git clone -b LS180/320/400S3_V1.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
