@@ -94,7 +94,7 @@ Linux/Mac: `git clone -b C32_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver
 
 Windows: `git clone --branch C32_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
-### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C32W.png" width="50px" />C32W_v4.0[link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C32W_v4.0)
+### <img src="https://github.com/Lslidar/Lslidar_ROS1_driver/blob/master/image/C32W.png" width="50px" />C32W_v4.0 [link](https://github.com/Lslidar/Lslidar_ROS1_driver/tree/C32W_v4.0)
 
 Linux/Mac: `git clone -b C32W_V4.0 https://github.com/Lslidar/Lslidar_ROS1_driver.git`
 
