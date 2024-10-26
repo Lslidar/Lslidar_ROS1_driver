@@ -1,0 +1,34 @@
+
+<launch>
+  <arg name="device_ip" default="192.168.1.200" />
+  <arg name="msop_port" default="2368"/>
+  <arg name="difop_port" default="2369"/>
+  <arg name="use_time_service" default="false" />
+  <arg name="pcl_type" default="false" />
+  <arg name="packet_rate" default="1695.0"/>
+
+    <!-- nodelet manager -->
+
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />
+  <node pkg="nodelet" type="nodelet" name="lslidar_n301_driver_nodelet"
+        args="load lslidar_driver/DriverNodelet nodelet_manager" output="screen" respawn="true">
+    <param name="packet_rate" value="$(arg packet_rate)"/>
+    <param name="device_ip" value="$(arg device_ip)" />
+    <param name="msop_port" value="$(arg msop_port)" />
+    <param name="difop_port" value="$(arg difop_port)"/>
+    <param name="pcl_type" value="$(arg pcl_type)"/>
+    <param name="add_multicast" value="false"/>
+    <param name="group_ip" value="224.1.1.2"/>
+    <param name="use_time_service" value="$(arg use_time_service)"/>
+    <param name="distance_min" value="0.15"/>       <!-- 雷达扫描最小距离 -->
+    <param name="distance_max" value="200.0"/>      <!-- 雷达扫描最大距离 -->
+    <param name="angle_disable_min" value="0"/>     <!-- 雷达扫描最小裁剪角度 单位: 0.01°-->
+    <param name="angle_disable_max" value="0"/>     <!-- 雷达扫描最大裁剪角度 单位: 0.01°-->
+    <param name="protocol" value="1"/>              <!-- 1: 1.7协议    2: 1.6协议 -->
+    <param name="frame_id" value="laser_link"/>
+    <param name="horizontal_angle_resolution" value="0.18"/>  <!-- 水平角度分辨率: 5Hz:0.09  10Hz:0.18  20Hz:0.36 -->
+    <param name="laserscan_topic" value="scan"/>    <!-- laserscan 话题 -->
+    <param name="coordinate_opt" value="false"/>
+  </node>
+
+</launch>

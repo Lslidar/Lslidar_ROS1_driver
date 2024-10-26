@@ -1,0 +1,31 @@
+<launch>
+  <arg name="device_ip" default="192.168.1.200" />   <!-- 雷达ip -->
+  <arg name="msop_port" default="2368"/>             <!-- 雷达目的数据端口 -->
+  <arg name="difop_port" default="2369"/>            <!-- 雷达目的设备端口 -->
+  <arg name="use_time_service" default="false" />    <!-- 雷达是否使用授时(GPS) -->
+  <arg name="packet_rate" default="840.0"/>
+
+  <node pkg="lslidar_n301_driver" type="lslidar_n301_driver_node" name="lslidar_driver_node" output="screen">
+    <!--param name="pcap" value="$(find lslidar_n301_driver)/pcap/xxx.pcap" /-->
+    <param name="use_time_service" value="$(arg use_time_service)"/>
+    <param name="packet_rate" value="$(arg packet_rate)"/>
+    <param name="device_ip" value="$(arg device_ip)" />
+    <param name="msop_port" value="$(arg msop_port)" />
+    <param name="difop_port" value="$(arg difop_port)"/>
+    <param name="add_multicast" value="false"/>     <!-- 是否开启组播 true:使用组播模式-->
+    <param name="group_ip" value="224.1.1.2"/>      <!-- 组播ip -->
+    <param name="protocol" value="1"/>              <!-- 1: 1.7协议    2: 1.6协议 -->
+    <param name="frame_id" value="laser_link"/>     <!-- 点云帧id -->
+    <param name="laserscan_topic" value="scan"/>    <!-- laserscan 话题 -->
+    <param name="distance_min" value="0.15"/>       <!-- 雷达扫描最小距离 小于该值的点将被过滤-->
+    <param name="distance_max" value="200.0"/>      <!-- 雷达扫描最大距离 大于该值的点将被过滤-->
+    <param name="angle_disable_min" value="0"/>     <!-- 雷达扫描最小裁剪角度 单位: 0.01°-->
+    <param name="angle_disable_max" value="0"/>     <!-- 雷达扫描最大裁剪角度 单位: 0.01°-->
+    <param name="horizontal_angle_resolution" value="0.18"/>  <!-- 水平角度分辨率: 5Hz:0.09  10Hz:0.18  20Hz:0.36 -->
+    <param name="coordinate_opt" value="true"/>    <!-- 点云0度角对应方向  true: x轴正方向 -->
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find lslidar_n301_driver)/rviz/lslidar.rviz"/>
+  
+</launch>
+<!-- launch-prefix="gdb args" -->
