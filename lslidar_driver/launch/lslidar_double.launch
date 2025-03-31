@@ -1,0 +1,80 @@
+<launch>
+  <arg name="device_ip1" default="192.168.1.200"/>   <!-- 雷达1ip -->
+  <arg name="msop_port1" default="2368"/>            <!-- 雷达1目的数据端口 -->
+  <arg name="difop_port1" default="2369"/>           <!-- 雷达1目的设备端口 -->
+
+  <arg name="device_ip2" default="192.168.1.201"/>   <!-- 雷达2ip -->
+  <arg name="msop_port2" default="2370"/>            <!-- 雷达2目的数据端口 -->
+  <arg name="difop_port2" default="2371"/>           <!-- 雷达2目的设备端口 -->
+
+  <arg name="use_time_service" default="false"/>    <!-- 雷达是否使用授时(GPS PTP NTP) -->
+  <arg name="pcl_type" default="false"/>            <!-- 点云类型   true: xyzi -->
+  <arg name="packet_rate" default="1695.0"/>        <!-- PCAP文件回放速率，离线解析pcap包时使用 -->
+
+  <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="cx_left">
+    <!-- 离线解析PCAP数据时打开注释 --> 
+    <!-- <param name="pcap" value="$(find lslidar_driver)/pcap/xxx.pcap"/> -->  
+    <!-- 自定义线束角度裁剪文件 -->
+    <param name="filter_angle_file" value="$(find lslidar_driver)/params/filter_angle.yaml"/> 
+    <param name="use_time_service" value="$(arg use_time_service)"/>
+    <param name="packet_rate" value="$(arg packet_rate)"/>
+    <param name="lidar_type" value="CX"/>
+    <param name="device_ip" value="$(arg device_ip1)"/>
+    <param name="msop_port" value="$(arg msop_port1)"/>
+    <param name="difop_port" value="$(arg difop_port1)"/>
+    <param name="pcl_type" value="$(arg pcl_type)"/>
+    <param name="add_multicast" value="false"/>     <!-- 雷达是否开启组播 true:使用组播模式-->
+    <param name="group_ip" value="224.1.1.2"/>      <!-- 雷达组播ip -->
+    <param name="frame_id" value="laser_link"/>     <!-- 点云帧id -->
+    <param name="pointcloud_topic" value="lslidar_point_cloud"/>  <!-- 发布点云话题名 -->
+    <param name="min_range" value="0.15"/>          <!-- 雷达扫描最小距离 小于该值的点将被过滤 -->
+    <param name="max_range" value="200.0"/>         <!-- 雷达扫描最大距离 大于该值的点将被过滤 -->
+    <param name="angle_disable_min" value="0"/>     <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->
+    <param name="angle_disable_max" value="0"/>     <!-- 雷达扫描最大裁剪角度 填整数 单位: 0.01° -->
+    <param name="horizontal_angle_resolution" value="0.18"/>  <!--10Hz:0.18  20Hz:0.36 5Hz:0.09 -->
+    <param name="publish_scan" value="false"/>      <!-- 是否发布 LaserScan 数据 -->
+    <param name="scan_num" value="8"/>              <!-- LaserScan线号 -->
+    
+    <param name="is_pretreatment" value="false"/> <!--是否开启预处理 仅对点云生效-->
+    <param name="x_offset" value="0.0"/>  <!-- rviz 中表现为围绕红色的 x 轴偏移量 单位: m-->
+    <param name="y_offset" value="0.0"/>  <!-- rviz 中表现为围绕绿色的 y 轴偏移量 单位: m-->
+    <param name="z_offset" value="0.0"/>  <!-- rviz 中表现为围绕蓝色的 z 轴偏移量 单位: m-->
+    <param name="roll" value="0.0"/>      <!-- rviz 中表现为围绕红色的 x 轴旋转   单位: rad-->
+    <param name="pitch" value="0.0"/>     <!-- rviz 中表现为围绕绿色的 y 轴旋转   单位: rad-->
+    <param name="yaw" value="0.0"/>       <!-- rviz 中表现为围绕蓝色的 z 轴旋转   单位: rad-->
+  </node>
+
+  <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="cx_right">
+    <!-- 离线解析PCAP数据时打开注释 --> 
+    <!-- <param name="pcap" value="$(find lslidar_driver)/pcap/xxx.pcap"/> -->  
+    <!-- 自定义线束角度裁剪文件 -->
+    <param name="filter_angle_file" value="$(find lslidar_driver)/params/filter_angle.yaml"/> 
+    <param name="use_time_service" value="$(arg use_time_service)"/>
+    <param name="packet_rate" value="$(arg packet_rate)"/>
+    <param name="lidar_type" value="CX"/>
+    <param name="device_ip" value="$(arg device_ip2)"/>
+    <param name="msop_port" value="$(arg msop_port2)"/>
+    <param name="difop_port" value="$(arg difop_port2)"/>
+    <param name="pcl_type" value="$(arg pcl_type)"/>
+    <param name="add_multicast" value="false"/>     <!-- 雷达是否开启组播 true:使用组播模式-->
+    <param name="group_ip" value="224.1.1.2"/>      <!-- 雷达组播ip -->
+    <param name="frame_id" value="laser_link"/>     <!-- 点云帧id -->
+    <param name="pointcloud_topic" value="lslidar_point_cloud"/>  <!-- 发布点云话题名 -->
+    <param name="min_range" value="0.15"/>          <!-- 雷达扫描最小距离 小于该值的点将被过滤 -->
+    <param name="max_range" value="200.0"/>         <!-- 雷达扫描最大距离 大于该值的点将被过滤 -->
+    <param name="angle_disable_min" value="0"/>     <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->
+    <param name="angle_disable_max" value="0"/>     <!-- 雷达扫描最大裁剪角度 填整数 单位: 0.01° -->
+    <param name="horizontal_angle_resolution" value="0.18"/>  <!--10Hz:0.18  20Hz:0.36 5Hz:0.09 -->
+    <param name="publish_scan" value="false"/>      <!-- 是否发布 LaserScan 数据 -->
+    <param name="scan_num" value="8"/>              <!-- LaserScan线号 -->
+    
+    <param name="is_pretreatment" value="false"/> <!--是否开启预处理 仅对点云生效-->
+    <param name="x_offset" value="0.0"/>  <!-- rviz 中表现为围绕红色的 x 轴偏移量 单位: m-->
+    <param name="y_offset" value="0.0"/>  <!-- rviz 中表现为围绕绿色的 y 轴偏移量 单位: m-->
+    <param name="z_offset" value="0.0"/>  <!-- rviz 中表现为围绕蓝色的 z 轴偏移量 单位: m-->
+    <param name="roll" value="0.0"/>      <!-- rviz 中表现为围绕红色的 x 轴旋转   单位: rad-->
+    <param name="pitch" value="0.0"/>     <!-- rviz 中表现为围绕绿色的 y 轴旋转   单位: rad-->
+    <param name="yaw" value="0.0"/>       <!-- rviz 中表现为围绕蓝色的 z 轴旋转   单位: rad-->
+  </node>
+
+</launch>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>lslidar_driver</name>
+  <version>5.0.9</version>
+  <description>The lslidar_driver package</description>
+  <maintainer email="jianjiangxie@lslidar.com">lslidar</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>lslidar_msgs</build_depend>
+  <build_depend>libyaml-cpp-dev</build_depend>
+
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>pcl_ros</build_export_depend>
+  <build_export_depend>pcl_conversions</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>message_runtime</build_export_depend>
+  <build_export_depend>lslidar_msgs</build_export_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>pcl_conversions</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>lslidar_msgs</exec_depend>
+  <exec_depend>libyaml-cpp</exec_depend>
+</package>
