@@ -49,9 +49,11 @@ add_definitions("-D${PROJECT_NAME}_VERSION=\"${${PROJECT_NAME}_VERSION}\"")
 
 add_library(lslidar_driver
   src/input.cpp
+  src/lsiosr.cpp
   src/lslidar_ch_driver.cpp
   src/lslidar_cx_driver.cpp
   src/lslidar_ls_driver.cpp
+  src/lslidar_x10_driver.cpp
   src/lslidar_services.cpp
   src/lslidar_device_info.cpp
 )

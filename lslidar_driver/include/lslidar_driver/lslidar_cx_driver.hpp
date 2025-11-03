@@ -28,9 +28,7 @@ class Request;
 #include <std_msgs/Int32.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/impl/transforms.hpp>
-#include <pcl_conversions/pcl_conversions.h>
 #include <boost/shared_ptr.hpp>
-#include <sensor_msgs/LaserScan.h>
 #include <pcl_ros/point_cloud.h>
 #include <std_msgs/Float64.h>
 #include <yaml-cpp/yaml.h>
@@ -72,14 +70,16 @@ namespace lslidar_driver {
     static const int conversionAngle_C16_3 = 1468;  //C16 3.0
     static const int conversionAngle_C32_3 = 1298;  //C32 3.0
 
-    static const double POINT_TIME_WEIGHT = 0.00260416;
-    
+    static const double POINT_TIME_WEIGHT_CX = 0.00260416;
+
+    // Pre-compute the sine and cosine for the altitude angles.
     //c32 5.0 
     static const float c32_v5_vertical_angle[32] = {
-            -20.8f, 0.0f, -10.4f, 10.4f, -15.6f, 5.2f, -5.2f, 15.6f,
-            -19.5f, 1.3f, -9.1f, 11.7f, -14.3f, 6.5f, -3.9f, 16.9f,
-            -18.2f, 2.6f, -7.8f, 13.0f, -13.0f, 7.8f, -2.6f, 18.2f,
-            -16.9f, 3.9f, -6.5f, 14.3f, -11.7f, 9.1f, -1.3f, 19.5f};
+            -20.8f, 0.0f, -15.6f, 5.2f, -10.4f, 10.4f, -5.2f, 15.6f,
+            -18.2f, 2.6f, -13.0f, 7.8f, -7.8f, 13.0f, -2.6f, 18.2f,
+            -19.5f, 1.3f, -14.3f, 6.5f, -9.1f, 11.7f, -3.9f, 16.9f,
+            -16.9f, 3.9f, -11.7f, 9.1f, -6.5f, 14.3f, -1.3f, 19.5f};
+
 
     //c32 4.0 32度
     static const float c32_vertical_angle[32] = {
@@ -134,7 +134,7 @@ namespace lslidar_driver {
 
     static const float c16_domestic_vertical_angle[16] = {-16.0f, -8.0f, 0.0f, 8.0f, -14.0f, -6.0f, 2.0f, 10.0f, 
                                                           -12.0f, -4.0f, 4.0f, 12.0f, -10.0f, -2.0f, 6.0f, 14.0f};
-
+    
     static const int cx_v5_remap_table[4] = {0, 2, 1, 3};
 
     static const float c16_v5_vertical_angle[16] = {-16.0f, 0.0f, -8.0f, 8.0f, -14.0f, 2.0f, -6.0f, 10.0f, 
@@ -148,7 +148,9 @@ namespace lslidar_driver {
     
     static const float ckm8_vertical_angle[8] = {-12.0f, 4.0f, -8.0f, 8.0f, -4.0f, 10.0f, 0.0f, 12.0f};
 
-    static const float c1_vertical_angle[8] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    //static const float c4_vertical_angle[4] = {-12.0f, 8.0f, 0.0f, 12.0f};
+
+    static const float c1_vertical_angle[1] = {0.0f};
 
     //c16 3.0
     static const float c16_30_vertical_angle[16] = {-15, 1, -13, 3, -11, 5, -9, 7, -7, 9, -5, 11, -3, 13, -1, 15};
@@ -166,8 +168,6 @@ namespace lslidar_driver {
         float distance[SCANS_PER_PACKET];
         float intensity[SCANS_PER_PACKET];
     };
-
-    static std::string lidar_type;
 
     class LslidarCxDriver : public LslidarDriver {
     public:
@@ -193,7 +193,7 @@ namespace lslidar_driver {
 
         bool initAngleConfig();
 
-        bool checkPacketValidity(lslidar_msgs::LslidarPacketPtr &packet);
+        bool checkPacketValidity(const lslidar_msgs::LslidarPacketPtr &packet) const;
 
         void decodePacket(lslidar_msgs::LslidarPacketPtr &packet);
 
@@ -203,7 +203,7 @@ namespace lslidar_driver {
 
         void pointcloudToLaserscan(const sensor_msgs::PointCloud2 &cloud_msg, sensor_msgs::LaserScan &output_scan);
 
-        bool determineLidarType();
+        bool determineLidarModel();
 
     public:
         int scan_num{};
@@ -219,7 +219,6 @@ namespace lslidar_driver {
         int return_mode;
         int fpga_type{};
 
-        in_addr lidar_ip{};
         std::string filter_angle_file;
 
         bool pcl_type{};
@@ -237,10 +236,10 @@ namespace lslidar_driver {
         ros::NodeHandle nh;
         ros::NodeHandle pnh;
 
-        ros::ServiceServer motor_control_service;
-        ros::ServiceServer power_control_service;
-        ros::ServiceServer rfd_removal_service;
-        ros::ServiceServer tail_removal_service;
+        ros::ServiceServer motor_control_service_;
+        ros::ServiceServer power_control_service_;
+        ros::ServiceServer rfd_removal_service_;
+        ros::ServiceServer tail_removal_service_;
 
         unsigned char packetTimeStamp[10];
         struct tm cur_time{};
@@ -271,7 +270,6 @@ namespace lslidar_driver {
         int remove_tail_points;        // 去除拖尾档位
         int tail_filter_distance;      // 滤拖尾距离
 
-        bool start_process_msop;
         bool is_msc16;
 
         int conversionAngle{};

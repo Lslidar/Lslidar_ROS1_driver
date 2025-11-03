@@ -40,7 +40,6 @@ namespace lslidar_driver {
                                                                                            point_cloud_xyzi_bak_(new pcl::PointCloud<pcl::PointXYZI>),
                                                                                            scan_msg(new sensor_msgs::LaserScan),
                                                                                            scan_msg_bak(new sensor_msgs::LaserScan),
-                                                                                           start_process_msop(false),
                                                                                            is_msc16(true) {
         services_ = std::make_shared<LslidarCxServices>();
     }
@@ -55,7 +54,9 @@ namespace lslidar_driver {
         pnh.param<std::string>("device_ip", lidar_ip_string, std::string("192.168.1.200"));
         pnh.param<int>("msop_port", msop_udp_port, (int) MSOP_DATA_PORT_NUMBER);
         pnh.param<int>("difop_port", difop_udp_port, (int) DIFOP_DATA_PORT_NUMBER);
-        pnh.param<std::string>("pointcloud_topic", pointcloud_topic, "lslidar_point_cloud");
+        pnh.param<std::string>("pointcloud_topic", pointcloud_topic_, "lslidar_point_cloud");
+        pnh.param<bool>("use_first_point_time", use_first_point_time, false);
+        pnh.param<bool>("use_absolute_time", use_absolute_time, false);
         pnh.param<double>("min_range", min_range, 0.3);
         pnh.param<double>("max_range", max_range, 150.0);
         pnh.param<bool>("is_pretreatment", is_pretreatment, false);
@@ -74,7 +75,6 @@ namespace lslidar_driver {
         pnh.param<int>("scan_num", scan_num, 8);
         pnh.param<double>("horizontal_angle_resolution", horizontal_angle_resolution, 0.2);
         pnh.param<bool>("publish_scan", publish_scan, false);
-        // inet_aton(lidar_ip_string.c_str(), &lidar_ip);
         
         ROS_INFO_STREAM("Only accepting packets from IP address: " << lidar_ip_string.c_str());
         if (add_multicast) ROS_INFO_STREAM("opening UDP socket: group_address " << group_ip_string);
@@ -83,24 +83,24 @@ namespace lslidar_driver {
     }
 
     bool LslidarCxDriver::createRosIO() {
-        pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>(pointcloud_topic, 10);
-        if(publish_scan) laserscan_pub = nh.advertise<sensor_msgs::LaserScan>("scan", 10);
-        lidar_info_pub = nh.advertise<lslidar_msgs::LslidarInformation>("lslidar_device_info", 1);
-        time_pub = nh.advertise<std_msgs::Float64>("time_topic", 10);
+        pointcloud_pub_ = nh.advertise<sensor_msgs::PointCloud2>(pointcloud_topic_, 10);
+        if(publish_scan) laserscan_pub_ = nh.advertise<sensor_msgs::LaserScan>("scan", 10);
+        lidar_info_pub_ = nh.advertise<lslidar_msgs::LslidarInformation>("lslidar_device_info", 1);
+        time_pub_ = nh.advertise<std_msgs::Float64>("time_topic", 10);
 
-        network_config_service = nh.advertiseService("network_setup", &LslidarCxServices::setIpAndPort,
+        network_config_service_ = nh.advertiseService("network_setup", &LslidarCxServices::setIpAndPort,
                                                 std::dynamic_pointer_cast<LslidarCxServices>(services_).get());
-        motor_speed_service = nh.advertiseService("motor_speed", &LslidarCxServices::setMotorSpeed,
+        motor_speed_service_ = nh.advertiseService("motor_speed", &LslidarCxServices::setMotorSpeed,
                                                 std::dynamic_pointer_cast<LslidarCxServices>(services_).get());
-        motor_control_service = nh.advertiseService("motor_control", &LslidarCxServices::setMotorControl, 
+        motor_control_service_ = nh.advertiseService("motor_control", &LslidarCxServices::setMotorControl, 
                                                 std::dynamic_pointer_cast<LslidarCxServices>(services_).get());
-        power_control_service = nh.advertiseService("power_control", &LslidarCxServices::setPowerControl, 
+        power_control_service_ = nh.advertiseService("power_control", &LslidarCxServices::setPowerControl, 
                                                 std::dynamic_pointer_cast<LslidarCxServices>(services_).get());
-        rfd_removal_service = nh.advertiseService("remove_rain_fog_dust", &LslidarCxServices::setRfdRemoval, 
+        rfd_removal_service_ = nh.advertiseService("remove_rain_fog_dust", &LslidarCxServices::setRfdRemoval, 
                                                 std::dynamic_pointer_cast<LslidarCxServices>(services_).get());
-        tail_removal_service = nh.advertiseService("tail_remove", &LslidarCxServices::setTailRemoval, 
+        tail_removal_service_ = nh.advertiseService("tail_remove", &LslidarCxServices::setTailRemoval, 
                                                 std::dynamic_pointer_cast<LslidarCxServices>(services_).get());
-        time_mode_service = nh.advertiseService("time_mode", &LslidarCxServices::setTimeMode, 
+        time_mode_service_ = nh.advertiseService("time_mode", &LslidarCxServices::setTimeMode, 
                                                 std::dynamic_pointer_cast<LslidarCxServices>(services_).get());
         
         if (!dump_file.empty()) {
@@ -123,6 +123,9 @@ namespace lslidar_driver {
         this->packet_time_s = 0;
         this->packet_time_ns = 0;
         this->timeStamp = ros::Time(0.0);
+
+        point_time_offset = use_first_point_time ? 1 : 0;
+        relative_time_offset = use_absolute_time ? 0 : 1;
     }
 
     bool LslidarCxDriver::initAngleConfig() {
@@ -178,8 +181,6 @@ namespace lslidar_driver {
     }
 
     bool LslidarCxDriver::initialize() {
-        this->initTimeStamp();
-
         if (!loadParameters()) {
             ROS_WARN("cannot load all required ROS parameters.");
             return false;
@@ -190,15 +191,17 @@ namespace lslidar_driver {
             return false;
         }
 
-        if(!determineLidarType()) {
-            ROS_WARN("lidar type error,please check Lidar model.");
-            return false;
+        while (ros::ok() && !determineLidarModel()) {
+            ROS_WARN("Lidar model error, please check Lidar model. Retrying...");
+            ros::Duration(1.0).sleep();
         }
 
         if (!initAngleConfig()) {
             ROS_WARN("Failed to initialize angle configuration.");
             return false;
         }
+
+        this->initTimeStamp();
 
         if (is_pretreatment) {
             pointcloud_transform_.setTransform(x_offset, y_offset, z_offset, roll, pitch, yaw);
@@ -209,7 +212,7 @@ namespace lslidar_driver {
 
         point_cloud_xyzi_->header.frame_id = frame_id;
         point_cloud_xyzi_->height = 1;
-
+        
         if (publish_scan) {
             scan_msg->angle_min = -M_PI;
             scan_msg->angle_max = M_PI;
@@ -226,26 +229,27 @@ namespace lslidar_driver {
         return true;
     }
 
-
     void LslidarCxDriver::publishPointcloud() {
         if (!is_get_difop_.load()) return;
         std::unique_lock<std::mutex> lock(pointcloud_lock);
 
         sensor_msgs::PointCloud2 pc_msg;
         if (pcl_type) {
+            if (point_cloud_xyzi_bak_->points.size() < 50) return;
             if (is_pretreatment) pointcloud_transform_.applyTransform(*point_cloud_xyzi_bak_);
             pcl::toROSMsg(*point_cloud_xyzi_bak_, pc_msg);
         } else {
+            if (point_cloud_xyzirt_bak_->points.size() < 50) return;
             if (is_pretreatment) pointcloud_transform_.applyTransform(*point_cloud_xyzirt_bak_);           
             pcl::toROSMsg(*point_cloud_xyzirt_bak_, pc_msg);
         }
 
-        pc_msg.header.stamp = ros::Time(sweep_end_time);
-        pointcloud_pub.publish(pc_msg);
+        pc_msg.header.stamp = ros::Time(point_cloud_time);
+        pointcloud_pub_.publish(pc_msg);
 
         std_msgs::Float64 time_msg;
-        time_msg.data = sweep_end_time;
-        time_pub.publish(time_msg);
+        time_msg.data = point_cloud_time;
+        time_pub_.publish(time_msg);
 
         return;
     }
@@ -253,16 +257,17 @@ namespace lslidar_driver {
     void LslidarCxDriver::publishScan() {
         std::unique_lock<std::mutex> lock(pointcloud_lock);
         scan_msg_bak->header.frame_id = frame_id;
-        scan_msg_bak->header.stamp = ros::Time(sweep_end_time);
-        laserscan_pub.publish(scan_msg_bak);
+        scan_msg_bak->header.stamp = ros::Time(point_cloud_time);
+        laserscan_pub_.publish(scan_msg_bak);
     }
 
-    bool LslidarCxDriver::checkPacketValidity(lslidar_msgs::LslidarPacketPtr &packet) {
+    bool LslidarCxDriver::checkPacketValidity(const lslidar_msgs::LslidarPacketPtr &packet) const {
         for (size_t blk_idx = 0; blk_idx < BLOCKS_PER_PACKET; ++blk_idx) {
-            if (packet->data[blk_idx * 100] != 0xff && packet->data[blk_idx * 100 + 1] != 0xee) {
+            if (packet->data[blk_idx * 100] != 0xff || packet->data[blk_idx * 100 + 1] != 0xee) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -361,15 +366,17 @@ namespace lslidar_driver {
             if ((firings.azimuth[fir_idx] > angle_able_max) || firings.azimuth[fir_idx] < angle_able_min) return false;
         }
 
-        if (filter_angle[remapped_scan_idx][0] <= filter_angle[remapped_scan_idx][1]) {
-            if (firings.azimuth[fir_idx] >= filter_angle[remapped_scan_idx][0] &&
-                firings.azimuth[fir_idx] <= filter_angle[remapped_scan_idx][1]) {
-                return false;
-            }
-        } else {
-            if (firings.azimuth[fir_idx] >= filter_angle[remapped_scan_idx][0] ||
-                firings.azimuth[fir_idx] <= filter_angle[remapped_scan_idx][1]) {
-                return false;
+        if (filter_angle[remapped_scan_idx][0] != 0 || filter_angle[remapped_scan_idx][1] != 0) {
+            if (filter_angle[remapped_scan_idx][0] <= filter_angle[remapped_scan_idx][1]) {
+                if (firings.azimuth[fir_idx] >= filter_angle[remapped_scan_idx][0] &&
+                    firings.azimuth[fir_idx] <= filter_angle[remapped_scan_idx][1]) {
+                    return false;
+                }
+            } else {
+                if (firings.azimuth[fir_idx] >= filter_angle[remapped_scan_idx][0] ||
+                    firings.azimuth[fir_idx] <= filter_angle[remapped_scan_idx][1]) {
+                    return false;
+                }
             }
         }
 
@@ -379,16 +386,16 @@ namespace lslidar_driver {
     bool LslidarCxDriver::poll() {
         lslidar_msgs::LslidarPacketPtr packet(new lslidar_msgs::LslidarPacket());
 
-        while (true) {
+        while (ros::ok()) {
             // keep reading until full packet received
             int rc = msop_input_->getPacket(packet);
-            if (rc == 0) break;       // got a full packet?
-            if (rc == 1) continue;    // No full packet, retry
+            if (rc > 1) break;       // got a full packet?
+            if (rc == 0) continue;    // No full packet, retry
             if (rc < 0) return false; // System-level error, terminate,end of file reached?
         }
 
         //check if the packet is valid
-        if (!checkPacketValidity(packet) || !start_process_msop)  return false;
+        if (!checkPacketValidity(packet)) return false;
 
         packet_num++;
 
@@ -418,23 +425,22 @@ namespace lslidar_driver {
         if (use_time_service &&  fpga_type >= 4) {
             if (time_service_mode == 1 || time_service_mode == 3 || time_service_mode == 4 || time_service_mode == 5) {    //ptp授时
                 packet_time_s = packet->data[1201] * pow(2, 32) + (packet->data[1202] << 24) +
-                                       (packet->data[1203] << 16) +
-                                       (packet->data[1204] << 8) + packet->data[1205];
+                               (packet->data[1203] << 16) + (packet->data[1204] << 8) + packet->data[1205];
                 packet_time_ns = (packet->data[1206] +
-                                (packet->data[1207] << 8) +
-                                (packet->data[1208] << 16) +
-                                (packet->data[1209] << 24)) * 1e3; //ns
+                                 (packet->data[1207] << 8) +
+                                 (packet->data[1208] << 16) +
+                                 (packet->data[1209] << 24)); //ns
                 timeStamp = ros::Time(packet_time_s, packet_time_ns);// s,ns
                 packet->stamp = timeStamp;
                 current_packet_time = timeStamp.toSec();
             } else if (time_service_mode == 0) {          //gps授时
                 memset(&cur_time, 0, sizeof(cur_time));
                 cur_time.tm_year = packet->data[1200] + 2000 - 1900;
-                cur_time.tm_mon = packet->data[1201] - 1;
+                cur_time.tm_mon  = packet->data[1201] - 1;
                 cur_time.tm_mday = packet->data[1202];
                 cur_time.tm_hour = packet->data[1203];
-                cur_time.tm_min = packet->data[1204];
-                cur_time.tm_sec = packet->data[1205];
+                cur_time.tm_min  = packet->data[1204];
+                cur_time.tm_sec  = packet->data[1205];
                 packet_time_s = static_cast<uint64_t>(timegm(&cur_time)); //s
                 packet_time_ns = packet->data[1206] +
                                  (packet->data[1207] << 8) +
@@ -446,16 +452,14 @@ namespace lslidar_driver {
             } else if (time_service_mode == 2) {          //ntp授时
                 memset(&cur_time, 0, sizeof(cur_time));
                 cur_time.tm_year = packet->data[1200] + 2000 - 1900;
-                cur_time.tm_mon = packet->data[1201] - 1;
+                cur_time.tm_mon  = packet->data[1201] - 1;
                 cur_time.tm_mday = packet->data[1202];
                 cur_time.tm_hour = packet->data[1203];
-                cur_time.tm_min = packet->data[1204];
-                cur_time.tm_sec = packet->data[1205];
+                cur_time.tm_min  = packet->data[1204];
+                cur_time.tm_sec  = packet->data[1205];
                 packet_time_s = static_cast<uint64_t>(timegm(&cur_time)); //s
-                packet_time_ns = (packet->data[1206] +
-                                  (packet->data[1207] << 8) +
-                                  (packet->data[1208] << 16) +
-                                  (packet->data[1209] << 24)) * 1e3; //ns
+                packet_time_ns = (packet->data[1206] + (packet->data[1207] << 8) +
+                                 (packet->data[1208] << 16) + (packet->data[1209] << 24)); //ns
                 timeStamp = ros::Time(packet_time_s, packet_time_ns);
                 packet->stamp = timeStamp;
                 current_packet_time = timeStamp.toSec();
@@ -463,11 +467,11 @@ namespace lslidar_driver {
         } else if (use_time_service && fpga_type == 3) { // gps授时
             memset(&cur_time, 0, sizeof(cur_time));
             cur_time.tm_year = this->packetTimeStamp[9] + 2000 - 1900;
-            cur_time.tm_mon = this->packetTimeStamp[8] - 1;
+            cur_time.tm_mon  = this->packetTimeStamp[8] - 1;
             cur_time.tm_mday = this->packetTimeStamp[7];
             cur_time.tm_hour = this->packetTimeStamp[6];
-            cur_time.tm_min = this->packetTimeStamp[5];
-            cur_time.tm_sec = this->packetTimeStamp[4];
+            cur_time.tm_min  = this->packetTimeStamp[5];
+            cur_time.tm_sec  = this->packetTimeStamp[4];
             packet_time_s = static_cast<uint64_t>(timegm(&cur_time)); //s
             packet_time_ns = (packet->data[1200] +
                               packet->data[1201] * pow(2, 8) +
@@ -475,11 +479,9 @@ namespace lslidar_driver {
                               packet->data[1203] * pow(2, 24)) * 1e3; //ns
             timeStamp = ros::Time(packet_time_s, packet_time_ns);
 
-            if ((timeStamp - timeStamp_bak).toSec() < 0.0 && (timeStamp - timeStamp_bak).toSec() > -1.0
-                && packet_time_ns < 100000000) {
+            if ((timeStamp - timeStamp_bak).toSec() < 0.0 && (timeStamp - timeStamp_bak).toSec() > -1.0 && packet_time_ns < 100000000) {
                 timeStamp = ros::Time(packet_time_s + 1, packet_time_ns);
-            } else if ((timeStamp - timeStamp_bak).toSec() > 1.0 && (timeStamp - timeStamp_bak).toSec() < 1.2
-                       && packet_time_ns > 900000000) {
+            } else if ((timeStamp - timeStamp_bak).toSec() > 1.0 && (timeStamp - timeStamp_bak).toSec() < 1.2 && packet_time_ns > 900000000) {
                 timeStamp = ros::Time(packet_time_s - 1, packet_time_ns);
             }
             packet->stamp = timeStamp;
@@ -504,7 +506,7 @@ namespace lslidar_driver {
             }
         }
 
-        if (lidar_type == "c32_3") {
+        if (lidar_model == "C32_3") {
             for (int blk_idx = 0; blk_idx < BLOCKS_PER_PACKET; ++blk_idx) {
                 for (int scan_fir_idx = 0; scan_fir_idx < SCANS_PER_BLOCK; ++scan_fir_idx) {
                     if (1 >= scan_fir_idx % 4) {
@@ -523,18 +525,18 @@ namespace lslidar_driver {
             }
         }
 
-        double point_interval_time = (current_packet_time - last_packet_time) * POINT_TIME_WEIGHT;
+        double point_interval_time = (current_packet_time - last_packet_time) * POINT_TIME_WEIGHT_CX;
 
         for (size_t fir_idx = start_fir_idx; fir_idx < end_fir_idx; ++fir_idx) {
             if (angle_change) {
-                if ("C32W" == lidar_type) {
+                if ("C32W" == lidar_model) {
                     if (fir_idx % 32 == 29 || fir_idx % 32 == 6 || fir_idx % 32 == 14 || fir_idx % 32 == 22 ||
                         fir_idx % 32 == 30 || fir_idx % 32 == 7 || fir_idx % 32 == 15 || fir_idx % 32 == 23) {
                         firings.azimuth[fir_idx] += 389;
                     }
                     if (firings.azimuth[fir_idx] >= 36000) firings.azimuth[fir_idx] -= 36000;
                 }
-                if ("MSC16" == lidar_type) {
+                if ("MSC16" == lidar_model) {
                     firings.azimuth[fir_idx] += msc16_offset_angle[fir_idx % 16] < 0 ?
                                                 msc16_offset_angle[fir_idx % 16] + 36000 : msc16_offset_angle[fir_idx % 16];
                     if (firings.azimuth[fir_idx] >= 36000) { firings.azimuth[fir_idx] -= 36000; }
@@ -542,6 +544,7 @@ namespace lslidar_driver {
             }
             
             int remapped_scan_idx = calculateRing(fir_idx);
+
             //check if the point is valid
             if (!isPointValid(fir_idx, remapped_scan_idx)) continue;
 
@@ -564,7 +567,7 @@ namespace lslidar_driver {
             // computer the time of the point
             double time;
             if (last_packet_time > 1e-6) {
-                time = last_packet_time + point_interval_time * (fir_idx + 1) - sweep_end_time;
+                time = last_packet_time + point_interval_time * (fir_idx + 1) - sweep_end_time * relative_time_offset;
             } else {
                 time = current_packet_time;
             }
@@ -608,23 +611,26 @@ namespace lslidar_driver {
                 }
             }
         }
+        // a new sweep begins ----------------------------------------------------
 
-        // ---------------------------- a new sweep begins ----------------------------
         if (end_fir_idx != SCANS_PER_PACKET) {
-            //publish Last frame scan
+            //publish Last frame scan 
             if (last_packet_time > 1e-6) {
-                sweep_end_time = last_packet_time + point_interval_time * end_fir_idx;
+                sweep_end_time = last_packet_time + point_interval_time * (end_fir_idx + point_time_offset);
             } else {
                 sweep_end_time = current_packet_time;
             }
 
             sweep_end_time = sweep_end_time > 0 ? sweep_end_time : 0;
 
+            point_cloud_time = use_first_point_time ? last_point_cloud_time : sweep_end_time;
+            last_point_cloud_time = sweep_end_time;
+
             {
                 std::unique_lock<std::mutex> lock(pointcloud_lock);
-                point_cloud_xyzirt_bak_ = point_cloud_xyzirt_;
-                point_cloud_xyzi_bak_ = point_cloud_xyzi_;
-                scan_msg_bak = scan_msg;
+                point_cloud_xyzirt_bak_ = std::move(point_cloud_xyzirt_);
+                point_cloud_xyzi_bak_ = std::move(point_cloud_xyzi_);
+                scan_msg_bak = std::move(scan_msg);
             }
 
             thread_pool_->enqueue([this]() { publishPointcloud(); });
@@ -633,8 +639,8 @@ namespace lslidar_driver {
                 thread_pool_->enqueue([this]() { publishScan(); });
             }
 
-            point_cloud_xyzirt_.reset(new pcl::PointCloud<VPoint>);
-            point_cloud_xyzi_.reset(new pcl::PointCloud<pcl::PointXYZI>);
+            point_cloud_xyzirt_.reset(new pcl::PointCloud<VPoint>());
+            point_cloud_xyzi_.reset(new pcl::PointCloud<pcl::PointXYZI>());
             point_cloud_xyzirt_->header.frame_id = frame_id;
             point_cloud_xyzirt_->height = 1;
 
@@ -642,7 +648,7 @@ namespace lslidar_driver {
             point_cloud_xyzi_->height = 1;
 
             if (publish_scan) {
-                scan_msg.reset(new sensor_msgs::LaserScan);
+                scan_msg.reset(new sensor_msgs::LaserScan());
                 scan_msg->angle_min = -M_PI;
                 scan_msg->angle_max = M_PI;
                 scan_msg->range_min = min_range;
@@ -660,14 +666,14 @@ namespace lslidar_driver {
             end_fir_idx = SCANS_PER_PACKET;
             for (size_t fir_idx = start_fir_idx; fir_idx < end_fir_idx; ++fir_idx) {
                 if (angle_change) {
-                    if ("C32W" == lidar_type) {
+                    if ("C32W" == lidar_model) {
                         if (fir_idx % 32 == 29 || fir_idx % 32 == 6 || fir_idx % 32 == 14 || fir_idx % 32 == 22 ||
                             fir_idx % 32 == 30 || fir_idx % 32 == 7 || fir_idx % 32 == 15 || fir_idx % 32 == 23) {
                             firings.azimuth[fir_idx] += 389;
                         }
                         if (firings.azimuth[fir_idx] >= 36000) firings.azimuth[fir_idx] -= 36000;
                     }
-                    if ("MSC16" == lidar_type) {
+                    if ("MSC16" == lidar_model) {
                         firings.azimuth[fir_idx] += msc16_offset_angle[fir_idx % 16] < 0 ?
                                                     msc16_offset_angle[fir_idx % 16] + 36000 : msc16_offset_angle[fir_idx % 16];
                         if (firings.azimuth[fir_idx] >= 36000) { firings.azimuth[fir_idx] -= 36000; }
@@ -675,6 +681,7 @@ namespace lslidar_driver {
                 }
 
                 int remapped_scan_idx = calculateRing(fir_idx);
+
                 //check if the point is valid
                 if (!isPointValid(fir_idx, remapped_scan_idx)) continue;
 
@@ -697,7 +704,7 @@ namespace lslidar_driver {
                 // computer the time of the point
                 double time;
                 if (last_packet_time > 1e-6) {
-                    time = last_packet_time + point_interval_time * (fir_idx + 1) - sweep_end_time;
+                    time = last_packet_time + point_interval_time * (fir_idx + 1) - sweep_end_time * relative_time_offset;
                 } else {
                     time = current_packet_time;
                 }
@@ -756,7 +763,7 @@ namespace lslidar_driver {
         while (ros::ok()) {
             // keep reading
             int rc = difop_input_->getPacket(difop_packet);
-            if (rc == 0) {
+            if (rc > 1) {
                 if (difop_packet->data[0] != 0xa5 || difop_packet->data[1] != 0xff ||
                     difop_packet->data[2] != 0x00 || difop_packet->data[3] != 0x5a) {
                     return;
@@ -864,16 +871,16 @@ namespace lslidar_driver {
                 if (fpga_type != 0) {
                     Information device = device_info_->getCxDeviceInfo(difop_packet, fpga_type);
 
-                    lidar_info_data = boost::make_shared<lslidar_msgs::LslidarInformation>();
-                    lidar_info_data->Lidar_IP = device.lidarIp;
-                    lidar_info_data->Destination_IP = device.destinationIP;
-                    lidar_info_data->Lidar_Mac_Address = device.lidarMacAddress;
-                    lidar_info_data->Msop_Port = device.msopPort;
-                    lidar_info_data->Difop_Port = device.difopPort;
-                    lidar_info_data->Lidar_Serial_Number = device.lidarSerialNumber;
-                    lidar_info_data->FPGA_Board_2_Program = device.secondBoardProgram;
-                    lidar_info_data->FPGA_Board_3_Program = device.thirdBoardProgram;
-                    lidar_info_pub.publish(lidar_info_data);
+                    lidar_info_data_ = boost::make_shared<lslidar_msgs::LslidarInformation>();
+                    lidar_info_data_->Lidar_IP = device.lidarIp;
+                    lidar_info_data_->Destination_IP = device.destinationIP;
+                    lidar_info_data_->Lidar_Mac_Address = device.lidarMacAddress;
+                    lidar_info_data_->Msop_Port = device.msopPort;
+                    lidar_info_data_->Difop_Port = device.difopPort;
+                    lidar_info_data_->Lidar_Serial_Number = device.lidarSerialNumber;
+                    lidar_info_data_->FPGA_Board_2_Program = device.secondBoardProgram;
+                    lidar_info_data_->FPGA_Board_3_Program = device.thirdBoardProgram;
+                    lidar_info_pub_.publish(lidar_info_data_);
                 }
 
                 is_get_difop_.store(true);
@@ -883,18 +890,21 @@ namespace lslidar_driver {
         }
     }
 
-    bool LslidarCxDriver::determineLidarType(){
+    bool LslidarCxDriver::determineLidarModel(){
+        if (!is_get_difop_.load()) return false;
+
         lslidar_msgs::LslidarPacketPtr pkt(new lslidar_msgs::LslidarPacket());
         // Since the rslidar delivers data at a very high rate, keep
         // reading and publishing scans as fast as possible.
-        while (true) {
+        while (ros::ok()) {
             int rc_ = msop_input_->getPacket(pkt);
-            if (rc_ == 0) break;
+            if (rc_ > 1) break;
+            if (rc_ == 0) continue;
             if (rc_ < 0) return false;
         }
 
         if (pkt->data[1211] == 0x01) {
-            for (int i = 0; i < 8; ++i) {
+            for (int i = 0; i < 1; ++i) {
                 sin_scan_altitude[i] = sin(c1_vertical_angle[i] * DEG_TO_RAD);
                 cos_scan_altitude[i] = cos(c1_vertical_angle[i] * DEG_TO_RAD);
             }
@@ -902,13 +912,13 @@ namespace lslidar_driver {
             lidar_number_ = 1;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            lidar_type = "C1";
-            ROS_INFO("lidar type: C1");
+            lidar_model = "C1";
+            ROS_INFO("lidar model: C1");
             number_threshold = 1;
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x03) {
-            for (int i = 0; i < 8; ++i) {
+            for (int i = 0; i < 1; ++i) {
                 sin_scan_altitude[i] = sin(c1_vertical_angle[i] * DEG_TO_RAD);
                 cos_scan_altitude[i] = cos(c1_vertical_angle[i] * DEG_TO_RAD);
             }
@@ -916,13 +926,13 @@ namespace lslidar_driver {
             lidar_number_ = 1;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            lidar_type = "C1P";
-            ROS_INFO("lidar type: C1P");
+            lidar_model = "C1P";
+            ROS_INFO("lidar model: C1P");
             number_threshold = 1;
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if(pkt->data[1211] == 0x06){
-            for (int i = 0; i < 8; ++i) {
+            for (int i = 0; i < 1; ++i) {
                 sin_scan_altitude[i] = sin(c1_vertical_angle[i] * DEG_TO_RAD);
                 cos_scan_altitude[i] = cos(c1_vertical_angle[i] * DEG_TO_RAD);
             }
@@ -931,8 +941,8 @@ namespace lslidar_driver {
             distance_unit = 0.1;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            lidar_type = "N301";
-            ROS_INFO("lidar type: N301");
+            lidar_model = "N301";
+            ROS_INFO("lidar model: N301");
             number_threshold = 1;
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
@@ -945,8 +955,8 @@ namespace lslidar_driver {
             lidar_number_ = 8;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            lidar_type = "C8F";         
-            ROS_INFO("lidar type: C8F");
+            lidar_model = "C8F";         
+            ROS_INFO("lidar model: C8F");
             number_threshold = 2;
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
@@ -959,8 +969,8 @@ namespace lslidar_driver {
             lidar_number_ = 8;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            lidar_type = "c8";               
-            ROS_INFO("lidar type: C8");
+            lidar_model = "C8";               
+            ROS_INFO("lidar model: C8");
             number_threshold = 2;
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
@@ -973,8 +983,8 @@ namespace lslidar_driver {
             lidar_number_ = 8;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            lidar_type = "CKM8";
-            ROS_INFO("lidar type: CKM8/C4");
+            lidar_model = "CKM8";
+            ROS_INFO("lidar model: CKM8/C4");
             number_threshold = 2;
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
@@ -987,8 +997,8 @@ namespace lslidar_driver {
             R1 = R1_;
             conversionAngle = conversionAngle_;
             lidar_number_ = 16;
-            lidar_type = "C16";
-            ROS_INFO("lidar type: C16");
+            lidar_model = "C16";
+            ROS_INFO("lidar model: C16");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x65) {
@@ -1000,8 +1010,8 @@ namespace lslidar_driver {
             R1 = R1_v5;
             conversionAngle = conversionAngle_v5;
             lidar_number_ = 16;
-            lidar_type = "C16";
-            ROS_INFO("lidar type: C16 v5");
+            lidar_model = "C16";
+            ROS_INFO("lidar model: C16 v5");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x11) {
@@ -1014,8 +1024,8 @@ namespace lslidar_driver {
             R1 = R1_;
             conversionAngle = conversionAngle_;
             angle_change = true;  
-            lidar_type = "MSC16";        
-            ROS_INFO("lidar type: MSC16");
+            lidar_model = "MSC16";        
+            ROS_INFO("lidar model: MSC16");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x12) {
@@ -1027,8 +1037,8 @@ namespace lslidar_driver {
             lidar_number_ = 16;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            lidar_type = "C16_domestic";
-            ROS_INFO("lidar type: C16_domestic");
+            lidar_model = "C16_domestic";
+            ROS_INFO("lidar model: C16_domestic");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x20) {
@@ -1039,12 +1049,12 @@ namespace lslidar_driver {
             ring_ = 32;
             R1 = R1_;
             conversionAngle = conversionAngle_;
-            ROS_INFO("lidar type: C32");
+            ROS_INFO("lidar model: C32");
             lidar_number_ = 32;
-            lidar_type = "C32";
+            lidar_model = "C32";
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
-        } else if (pkt->data[1211] == 0x64) {
+        } else if (pkt->data[1211] == 0x64 || pkt->data[1211] == 0xc8) {
             for (int i = 0; i < 32; ++i) {
                 sin_scan_altitude[i] = sin(c32_v5_vertical_angle[i] * DEG_TO_RAD);
                 cos_scan_altitude[i] = cos(c32_v5_vertical_angle[i] * DEG_TO_RAD);
@@ -1053,8 +1063,13 @@ namespace lslidar_driver {
             R1 = R1_v5;
             conversionAngle = conversionAngle_v5;
             lidar_number_ = 32;
-            lidar_type = "C32";
-            ROS_INFO("lidar type: C32 v5");
+            if (pkt->data[1211] == 0x64) {
+                lidar_model = "C32";
+                ROS_INFO("lidar model: C32 v5");
+            } else {
+                lidar_model = "MS32L";
+                ROS_INFO("lidar model: MS32L");
+            }
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x45) {
@@ -1066,8 +1081,8 @@ namespace lslidar_driver {
             lidar_number_ = 32;
             R1 = R1_C32W;
             conversionAngle = conversionAngle_;                
-            lidar_type = "C32WP";
-            ROS_INFO("lidar type: C32WP");
+            lidar_model = "C32WP";
+            ROS_INFO("lidar model: C32WP");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x46) {
@@ -1080,8 +1095,8 @@ namespace lslidar_driver {
             R1 = R1_C32W;
             angle_change = true;
             conversionAngle = conversionAngle_;
-            lidar_type = "C32W";
-            ROS_INFO("lidar type: C32W");
+            lidar_model = "C32W";
+            ROS_INFO("lidar model: C32W");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x47) {
@@ -1093,8 +1108,8 @@ namespace lslidar_driver {
             lidar_number_ = 32;
             R1 = R1_C32W;
             conversionAngle = conversionAngle_;
-            lidar_type = "C32WN";
-            ROS_INFO("lidar type: C32WN");
+            lidar_model = "C32WN";
+            ROS_INFO("lidar model: C32WN");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x48) {
@@ -1106,8 +1121,8 @@ namespace lslidar_driver {
             lidar_number_ = 32;
             R1 = R1_C32W;
             conversionAngle = conversionAngle_;
-            lidar_type = "C32WB";
-            ROS_INFO("lidar type: C32WB");
+            lidar_model = "C32WB";
+            ROS_INFO("lidar model: C32WB");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x5a) {
@@ -1119,8 +1134,8 @@ namespace lslidar_driver {
             lidar_number_ = 32;
             R1 = R1_90;
             conversionAngle = conversionAngle_90;
-            lidar_type = "CH32R";
-            ROS_INFO("lidar type: CH32R");
+            lidar_model = "CH32R";
+            ROS_INFO("lidar model: CH32R");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x5d) {
@@ -1132,8 +1147,8 @@ namespace lslidar_driver {
             lidar_number_ = 32;
             R1 = R1_90;
             conversionAngle = conversionAngle_90;
-            lidar_type = "CH32RN";
-            ROS_INFO("lidar type: CH32R");
+            lidar_model = "CH32RN";
+            ROS_INFO("lidar model: CH32R");
             if (pkt->data[1210] == 0x39)  return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x00 && pkt->data[1205] == 0x10) {
@@ -1158,8 +1173,8 @@ namespace lslidar_driver {
             R1 = R2_;
             conversionAngle = conversionAngle_C16_3;
             distance_unit = 0.25;
-            lidar_type = "c16_3";
-            ROS_INFO("lidar type: c16, version 3.0");
+            lidar_model = "C16_3";
+            ROS_INFO("lidar model: C16, version 3.0");
             if (pkt->data[1204] == 0x39) return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else if (pkt->data[1211] == 0x00 && pkt->data[1205] == 0x20) {
@@ -1185,15 +1200,16 @@ namespace lslidar_driver {
             lidar_number_ = 32;
             R1 = R3_;
             conversionAngle = conversionAngle_C32_3;
-            lidar_type = "c32_3";
-            ROS_INFO("lidar type: c32, version 3.0 ");
+            lidar_model = "C32_3";
+            ROS_INFO("lidar model: C32, version 3.0 ");
             if (pkt->data[1204] == 0x39) return_mode = 2;
             ROS_INFO("return mode: %d", return_mode);
         } else {
             return false;
         }
 
-        start_process_msop = true;
         return true;
     }
 }  // namespace lslidar_driver
+
+

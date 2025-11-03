@@ -24,18 +24,18 @@ namespace lslidar_driver {
         if (pkt->data[0] == 0xA5 && pkt->data[1] == 0xFF && pkt->data[2] == 0x00 && pkt->data[3] == 0x5A) {
             
             {
-                std::lock_guard<std::mutex> lock(difop_data_mutex);
+                std::lock_guard<std::mutex> lock(difop_data_mutex_);
                 mempcpy(difop_data, pkt->data.data(), 1206);
             }
 
-            lslidar_ip = std::to_string(difop_data[10]) + "." + std::to_string(difop_data[11]) + "." +
-                         std::to_string(difop_data[12]) + "." + std::to_string(difop_data[13]);
+            lslidar_ip_ = std::to_string(difop_data[10]) + "." + std::to_string(difop_data[11]) + "." +
+                          std::to_string(difop_data[12]) + "." + std::to_string(difop_data[13]);
 
-            difop_valid.store(true);
+            difop_valid_.store(true);
             return 0;
         } else {
             ROS_ERROR("Can not get dev packet! Set failed !!!");
-            difop_valid.store(false);
+            difop_valid_.store(false);
             return -1;
         }
     }
@@ -52,17 +52,17 @@ namespace lslidar_driver {
     }
 
     bool LslidarServices::setUcwpData(unsigned char *ucwp_data) {
-        if (!difop_valid.load()) {
+        if (!difop_valid_.load()) {
             ROS_ERROR("No valid Difop packet available. Set failed!");
             return false;
         }
 
         {
-            std::lock_guard<std::mutex> lock(difop_data_mutex);
+            std::lock_guard<std::mutex> lock(difop_data_mutex_);
             mempcpy(ucwp_data, difop_data, 1206);
         }
 
-        difop_valid.store(false);
+        difop_valid_.store(false);
         setUcwpPacketHeader(ucwp_data);
 
         return true;
@@ -72,7 +72,7 @@ namespace lslidar_driver {
         int socketid;
         sockaddr_in addrSrv{};
         socketid = socket(2, 2, 0);
-        addrSrv.sin_addr.s_addr = inet_addr(lslidar_ip.c_str());
+        addrSrv.sin_addr.s_addr = inet_addr(lslidar_ip_.c_str());
         addrSrv.sin_family = AF_INET;
         addrSrv.sin_port = htons(2368);
         sendto(socketid, (const char *) ucwp_data, 1206, 0, (struct sockaddr *) &addrSrv, sizeof(addrSrv));
@@ -229,6 +229,18 @@ namespace lslidar_driver {
         } else if (req.motor_speed == 20) {
             ucwp_data[8] = 0x04;
             ucwp_data[9] = 0xB0;
+        } else if (req.motor_speed == 30) {
+            ucwp_data[8] = 0x07;
+            ucwp_data[9] = 0x08;
+        } else if (req.motor_speed == 40) {
+            ucwp_data[8] = 0x09;
+            ucwp_data[9] = 0x60;
+        } else if (req.motor_speed == 50) {
+            ucwp_data[8] = 0x0B;
+            ucwp_data[9] = 0xB8;
+        } else if (req.motor_speed == 60) {
+            ucwp_data[8] = 0x0E;
+            ucwp_data[9] = 0x10;
         } else {
             ROS_ERROR("Parameter error, please check the input parameters.");
             res.result = false;
@@ -380,9 +392,9 @@ namespace lslidar_driver {
 
         if (req.power_control == 1) {
             if (fpga_version == 5) {
-                ucwp_data[48] == 0xBB;
+                ucwp_data[48] = 0xBB;
             } else if (fpga_version == 4) {
-                ucwp_data[50] == 0xBB;
+                ucwp_data[50] = 0xBB;
             } else if (fpga_version == 3) {
                 ucwp_data[8] = 0x02;
                 ucwp_data[9] = 0x58;
@@ -390,9 +402,9 @@ namespace lslidar_driver {
             }
         } else if (req.power_control == 0) {
             if (fpga_version == 5) {
-                ucwp_data[48] == 0xAA;
+                ucwp_data[48] = 0xAA;
             } else if (fpga_version == 4) {
-                ucwp_data[50] == 0xAA;
+                ucwp_data[50] = 0xAA;
             } else if (fpga_version == 3) {
                 ucwp_data[45] = 0x01;
             }
@@ -517,7 +529,7 @@ namespace lslidar_driver {
             res.result = false;
             return false;
         }
-
+        // LSS4 45字节为是否发送无效数据
         if (req.angle_distortion_correction <= 1) {
             ucwp_data[45] = static_cast<unsigned char>(req.angle_distortion_correction);
         } else {
@@ -578,7 +590,7 @@ namespace lslidar_driver {
             res.result = false;
             return false;
         }
-
+                
         if (req.invalid_data <= 1) {
             ucwp_data[87] = static_cast<unsigned char>(req.invalid_data);
         } else {

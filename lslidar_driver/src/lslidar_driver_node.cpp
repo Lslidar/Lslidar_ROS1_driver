@@ -21,6 +21,7 @@
 #include "lslidar_driver/lslidar_ch_driver.hpp"
 #include "lslidar_driver/lslidar_cx_driver.hpp"
 #include "lslidar_driver/lslidar_ls_driver.hpp"
+#include "lslidar_driver/lslidar_x10_driver.hpp"
 
 using namespace lslidar_driver;
 
@@ -35,7 +36,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;
     ros::NodeHandle private_nh("~");
 
-    ROS_INFO("************ Lslidar ROS driver version: %s ************", lslidar_driver_VERSION);
+    ROS_INFO("************ LSLiDAR ROS DRIVER VERSION: %s ************", lslidar_driver_VERSION);
 
     std::string lidar_type;
     private_nh.param<std::string>("lidar_type", lidar_type, "CX");
@@ -43,14 +44,18 @@ int main(int argc, char** argv) {
     std::shared_ptr<lslidar_driver::LslidarDriver> driver;
 
     try {
-        if (lidar_type == "CX") {
+        if (lidar_type == "CX") {         // 机械式激光雷达
             driver = std::make_shared<lslidar_driver::LslidarCxDriver>(nh, private_nh);
-        }
-        else if (lidar_type == "LS") {
-            driver = std::make_shared<lslidar_driver::LslidarLsDriver>(nh, private_nh);
-        } 
-        else {
+        } else if (lidar_type == "CH"){   // 905激光雷达
             driver = std::make_shared<lslidar_driver::LslidarChDriver>(nh, private_nh);
+        } else if (lidar_type == "LS") {  // 1550激光雷达
+            driver = std::make_shared<lslidar_driver::LslidarLsDriver>(nh, private_nh);
+        } else if (lidar_type == "X10") { // 单线激光雷达
+            driver = std::make_shared<lslidar_driver::LslidarX10Driver>(nh, private_nh);
+        } else {
+            ROS_ERROR_STREAM("Invalid lidar type configured: '" << lidar_type 
+                        << "'. Supported types are: CX, CH, LS, X10");
+            throw std::invalid_argument("Unsupported lidar type");
         }
 
         if (!driver->initialize()) {

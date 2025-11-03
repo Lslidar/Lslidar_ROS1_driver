@@ -58,11 +58,14 @@ namespace lslidar_driver {
         }
 
         virtual int getPacket(lslidar_msgs::LslidarPacketPtr &pkt) = 0;
-        
+
+        virtual void sendPacket(const unsigned char *data, size_t length) = 0;
+
     protected:
         ros::NodeHandle private_nh_;
         uint16_t port_;
         std::string devip_str_;
+        int difop_port_;
         int cur_rpm_;
         int return_mode_;
         bool npkt_update_flag_;
@@ -80,10 +83,11 @@ namespace lslidar_driver {
 
         virtual int getPacket(lslidar_msgs::LslidarPacketPtr &pkt);
 
+        virtual void sendPacket(const unsigned char *data, size_t length);
+
     private:
         int sockfd_;
         in_addr devip_;
-
     };
 
 /** @brief lslidar input from PCAP dump file.
@@ -98,6 +102,8 @@ namespace lslidar_driver {
         virtual ~InputPCAP();
 
         virtual int getPacket(lslidar_msgs::LslidarPacketPtr &pkt);
+
+        virtual void sendPacket(const unsigned char *data, size_t length);
 
     private:
         ros::Rate packet_rate_;

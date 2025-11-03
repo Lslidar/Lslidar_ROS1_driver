@@ -1,16 +1,18 @@
 <launch>
-  <arg name="device_ip1" default="192.168.1.200"/>   <!-- 雷达1ip -->
-  <arg name="msop_port1" default="2368"/>            <!-- 雷达1目的数据端口 -->
-  <arg name="difop_port1" default="2369"/>           <!-- 雷达1目的设备端口 -->
+  <arg name="device_ip1" default="192.168.1.201"/>   <!-- 雷达1ip -->
+  <arg name="msop_port1" default="2361"/>            <!-- 雷达1目的数据端口 -->
+  <arg name="difop_port1" default="2370"/>           <!-- 雷达1目的设备端口 -->
 
-  <arg name="device_ip2" default="192.168.1.201"/>   <!-- 雷达2ip -->
-  <arg name="msop_port2" default="2370"/>            <!-- 雷达2目的数据端口 -->
-  <arg name="difop_port2" default="2371"/>           <!-- 雷达2目的设备端口 -->
+  <arg name="device_ip2" default="192.168.1.202"/>   <!-- 雷达2ip -->
+  <arg name="msop_port2" default="2362"/>            <!-- 雷达2目的数据端口 -->
+  <arg name="difop_port2" default="2369"/>           <!-- 雷达2目的设备端口 -->
 
-  <arg name="use_time_service" default="false"/>    <!-- 雷达是否使用授时(GPS PTP NTP) -->
-  <arg name="pcl_type" default="false"/>            <!-- 点云类型   true: xyzi -->
-  <arg name="packet_rate" default="1695.0"/>        <!-- PCAP文件回放速率，离线解析pcap包时使用 -->
-
+  <arg name="pcl_type" default="false"/>             <!-- 点云类型   true: xyzi -->
+  <arg name="use_time_service" default="false"/>     <!-- 雷达是否使用授时(GPS PTP NTP) -->
+  <arg name="use_first_point_time" default="false"/> <!-- true: 使用每帧第一个点的时间做为点云时间-->
+  <arg name="use_absolute_time" default="false"/>    <!-- 点时间格式 true: 使用绝对时间  注意与点云头文件中USE_ABSOLUTE_TIME保持一致-->
+  <arg name="packet_rate" default="1695.0"/>         <!-- PCAP文件回放速率，离线解析pcap包时使用 -->
+  
   <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="cx_left">
     <!-- 离线解析PCAP数据时打开注释 --> 
     <!-- <param name="pcap" value="$(find lslidar_driver)/pcap/xxx.pcap"/> -->  
@@ -18,7 +20,7 @@
     <param name="filter_angle_file" value="$(find lslidar_driver)/params/filter_angle.yaml"/> 
     <param name="use_time_service" value="$(arg use_time_service)"/>
     <param name="packet_rate" value="$(arg packet_rate)"/>
-    <param name="lidar_type" value="CX"/>
+    <param name="lidar_type" value="CX"/>           <!-- 雷达类型 -->
     <param name="device_ip" value="$(arg device_ip1)"/>
     <param name="msop_port" value="$(arg msop_port1)"/>
     <param name="difop_port" value="$(arg difop_port1)"/>
@@ -27,6 +29,8 @@
     <param name="group_ip" value="224.1.1.2"/>      <!-- 雷达组播ip -->
     <param name="frame_id" value="laser_link"/>     <!-- 点云帧id -->
     <param name="pointcloud_topic" value="lslidar_point_cloud"/>  <!-- 发布点云话题名 -->
+    <param name="use_first_point_time" value="$(arg use_first_point_time)"/> 
+    <param name="use_absolute_time" value="$(arg use_absolute_time)"/> 
     <param name="min_range" value="0.15"/>          <!-- 雷达扫描最小距离 小于该值的点将被过滤 -->
     <param name="max_range" value="200.0"/>         <!-- 雷达扫描最大距离 大于该值的点将被过滤 -->
     <param name="angle_disable_min" value="0"/>     <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->
@@ -51,7 +55,7 @@
     <param name="filter_angle_file" value="$(find lslidar_driver)/params/filter_angle.yaml"/> 
     <param name="use_time_service" value="$(arg use_time_service)"/>
     <param name="packet_rate" value="$(arg packet_rate)"/>
-    <param name="lidar_type" value="CX"/>
+    <param name="lidar_type" value="CX"/>           <!-- 雷达类型 -->
     <param name="device_ip" value="$(arg device_ip2)"/>
     <param name="msop_port" value="$(arg msop_port2)"/>
     <param name="difop_port" value="$(arg difop_port2)"/>
@@ -60,6 +64,8 @@
     <param name="group_ip" value="224.1.1.2"/>      <!-- 雷达组播ip -->
     <param name="frame_id" value="laser_link"/>     <!-- 点云帧id -->
     <param name="pointcloud_topic" value="lslidar_point_cloud"/>  <!-- 发布点云话题名 -->
+    <param name="use_first_point_time" value="$(arg use_first_point_time)"/> 
+    <param name="use_absolute_time" value="$(arg use_absolute_time)"/> 
     <param name="min_range" value="0.15"/>          <!-- 雷达扫描最小距离 小于该值的点将被过滤 -->
     <param name="max_range" value="200.0"/>         <!-- 雷达扫描最大距离 大于该值的点将被过滤 -->
     <param name="angle_disable_min" value="0"/>     <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->

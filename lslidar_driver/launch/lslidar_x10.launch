@@ -1,0 +1,49 @@
+<launch>
+  <arg name="lidar_model" default="M10"/>             <!-- 雷达型号 M10 M10GPS M10P N10 N10Plus N301-->
+  <arg name="device_ip" default="192.168.1.200"/>     <!-- 雷达ip -->
+  <arg name="msop_port" default="2368"/>              <!-- 雷达目的数据端口 -->
+  <arg name="difop_port" default="2369"/>             <!-- 雷达目的设备端口 -->
+  <arg name="use_time_service" default="false"/>      <!-- 雷达是否使用授时(GPS PTP NTP) -->
+  <arg name="use_first_point_time" default="false"/>  <!-- true: 使用每帧第一个点的时间做为点云时间-->
+  <arg name="packet_rate" default="188.0"/>           <!-- PCAP文件回放速率，离线解析pcap包时使用 -->
+
+  <arg name="serial_port" default=""/>                <!-- 雷达连接串口名称 使用网口请将值改为空-->
+
+  <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="x10">
+    <!-- 离线解析PCAP数据时打开注释 -->
+    <!-- <param name="pcap" value="$(find lslidar_driver)/pcap/xxx.pcap"/> -->
+    <param name="packet_rate" value="$(arg packet_rate)"/>
+    <param name="lidar_type" value="X10"/>            <!-- 雷达类型 -->
+    <param name="lidar_model" value="$(arg lidar_model)"/>
+    <param name="device_ip" value="$(arg device_ip)"/>
+    <param name="msop_port" value="$(arg msop_port)"/>
+    <param name="difop_port" value="$(arg difop_port)"/>
+    <param name="serial_port" value="$(arg serial_port)"/>  
+    <param name="use_time_service" value="$(arg use_time_service)"/>
+    <param name="frame_id" value="laser_link"/>       <!-- 点云帧id -->
+    <param name="pointcloud_topic" value="lslidar_point_cloud"/>  <!-- 发布点云话题名 -->
+    <param name="use_first_point_time" value="$(arg use_first_point_time)"/> 
+    <param name="min_range" value="0.15"/>            <!-- 雷达扫描最小距离 小于该值的点将被过滤 -->
+    <param name="max_range" value="25.0"/>            <!-- 雷达扫描最大距离 大于该值的点将被过滤 -->
+    <param name="angle_disable_min" value="0"/>       <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->
+    <param name="angle_disable_max" value="0"/>       <!-- 雷达扫描最大裁剪角度 填整数 单位: 0.01° -->
+    <param name="publish_scan" value="true"/>         <!-- 是否发布 LaserScan 数据  N10Plus仅发布第一回波数据 -->
+    <param name="use_high_precision" value="false"/>  <!-- 是否使用高精度模式(laserscan) N10建议开启 -->
+    <param name="publish_multiecholaserscan" value="false"/>  <!-- N10Plus 是否发布 MultiEchoLaserScan 数据-->
+    <param name="laserscan_topic" value="scan"/>      <!-- 发布 LaserScan 数据话题名称-->
+    <param name="N10Plus_hz" value="10"/>             <!-- N10Plus雷达扫描频率 [6,12] -->
+    <param name="enable_noise_filter" value="false"/> <!-- 是否开启孤立噪点滤波 N10Plus不生效-->
+
+    <param name="is_pretreatment" value="false"/> <!--是否开启预处理 仅对点云生效-->
+    <param name="x_offset" value="0.0"/>  <!-- rviz 中表现为围绕红色的 x 轴偏移量 单位: m-->
+    <param name="y_offset" value="0.0"/>  <!-- rviz 中表现为围绕绿色的 y 轴偏移量 单位: m-->
+    <param name="z_offset" value="0.0"/>  <!-- rviz 中表现为围绕蓝色的 z 轴偏移量 单位: m-->
+    <param name="roll" value="0.0"/>      <!-- rviz 中表现为围绕红色的 x 轴旋转   单位: rad-->
+    <param name="pitch" value="0.0"/>     <!-- rviz 中表现为围绕绿色的 y 轴旋转   单位: rad-->
+    <param name="yaw" value="0.0"/>       <!-- rviz 中表现为围绕蓝色的 z 轴旋转   单位: rad-->
+  </node>
+
+  <node name="rviz_X10" pkg="rviz" type="rviz" args="-d $(find lslidar_driver)/rviz/lslidar_x10.rviz"/> <!-- 注释此行不启动RViz -->
+ 
+  <!-- <node pkg="tf" type="static_transform_publisher" name="laser_link_to_world" args="0 0 0 0 0 0 world laser_link 100"/> -->
+</launch>

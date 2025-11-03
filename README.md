@@ -1,26 +1,34 @@
-# LSLIDAR_ROS_V5.0.9_250224 使用说明
+# LSLIDAR_ROS_V5.1.5_250822 使用说明
 
 ## 1.工程介绍
-​		LSLIDAR_ROS_V5.0.9_250224为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
+​		LSLIDAR_ROS_V5.1.5_250822为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
 
 #### 1.1 支持的雷达型号
 
+~~~bash
+# 单线激光雷达
+M10 M10GPS M10P N10	N10Plus N301(1.6 1.7)
+~~~
+
 ```crystal
-# 机械式雷达
+# 机械式激光雷达
 N301 5.5
 C16 C32	#3.0 4.0 5.0雷达
-C1 C1P C4 C8 C8F CKM8 MSC16 C16_domestic C32W C32WB C32WN C32WP CH32R CH32RN
+C1 C1P C4 C8 C8F CKM8 C16_domestic C32W C32WB C32WN C32WP CH32R CH32RN
+MSC16 MS32L(5.0)
 ```
 
 ~~~elixir
-# 905混合固态雷达
-CX1S3 CX6S3 CH16X1 CH32A CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256
+# 905混合固态激光雷达
+CX1S3 CX6S3 CH16X1 CH32A CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256 CH1W
 ~~~
 
 ```apl
-# 1550混合固态雷达
-LS25D    LS128S1  LS128S2  LS128S3  LS144S3 LS180S1  LS180S2  LS180S3
-LS320S2  LS320S3  LS400S1  LS400S2  LS400S3 MS06
+# 1550混合固态激光雷达
+LS25D    LS128S1  LS180S1  LS400S1     
+LS128S2  LS180S2  LS320S2  LS400S2  MS06
+LS128S3  LS144S3  LS180S3  LS320S3  LS400S3
+LSS4
 ```
 
 
@@ -67,11 +75,13 @@ source devel/setup.bash
 运行单个雷达:
 
 ~~~bash
-roslaunch lslidar_driver lslidar_cx.launch # 机械式雷达
+roslaunch lslidar_driver lslidar_x10.launch # 单线雷达
 
-roslaunch lslidar_driver lslidar_ch.launch # 905雷达
+roslaunch lslidar_driver lslidar_cx.launch  # 机械式雷达
 
-roslaunch lslidar_driver lslidar_ls.launch # 1550雷达
+roslaunch lslidar_driver lslidar_ch.launch  # 905雷达
+
+roslaunch lslidar_driver lslidar_ls.launch  # 1550雷达
 ~~~
 
 运行多个雷达：
@@ -80,6 +90,8 @@ roslaunch lslidar_driver lslidar_ls.launch # 1550雷达
 # 可根据实际情况自定义launch文件
 roslaunch lslidar_driver lslidar_double.launch
 ~~~
+
+
 
 
 
@@ -94,8 +106,10 @@ roslaunch lslidar_driver lslidar_double.launch
   <arg name="device_ip" default="192.168.1.200"/>   <!-- 雷达ip -->
   <arg name="msop_port" default="2368"/>            <!-- 雷达目的数据端口 -->
   <arg name="difop_port" default="2369"/>           <!-- 雷达目的设备端口 -->
-  <arg name="use_time_service" default="false"/>    <!-- 雷达是否使用授时(GPS PTP NTP) -->
   <arg name="pcl_type" default="false"/>            <!-- 点云类型   true: xyzi -->
+  <arg name="use_time_service" default="false"/>    <!-- 雷达是否使用授时(GPS PTP NTP) -->
+  <arg name="use_first_point_time" default="false"/><!-- true: 使用每帧第一个点的时间做为点云时间-->
+  <arg name="use_absolute_time" default="false"/>   <!-- 点时间格式 true: 使用绝对时间  注意与点云头文件中USE_ABSOLUTE_TIME保持一致-->
   <arg name="packet_rate" default="1695.0"/>     <!-- PCAP文件回放速率，离线解析pcap包时使用 -->
 
   <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="cx">
@@ -105,7 +119,7 @@ roslaunch lslidar_driver lslidar_double.launch
     <param name="filter_angle_file" value="$(find lslidar_driver)/param/filter_angle.yaml"/> 
     <param name="use_time_service" value="$(arg use_time_service)"/>
     <param name="packet_rate" value="$(arg packet_rate)"/>
-    <param name="lidar_type" value="CX"/>
+    <param name="lidar_type" value="CX"/>			<!-- 雷达类型 -->
     <param name="device_ip" value="$(arg device_ip)"/>
     <param name="msop_port" value="$(arg msop_port)"/>
     <param name="difop_port" value="$(arg difop_port)"/>
@@ -114,6 +128,8 @@ roslaunch lslidar_driver lslidar_double.launch
     <param name="group_ip" value="224.1.1.2"/>      <!-- 雷达组播ip -->
     <param name="frame_id" value="laser_link"/>     <!-- 点云帧id -->
     <param name="pointcloud_topic" value="lslidar_point_cloud"/>  <!-- 发布点云话题名 -->
+    <param name="use_first_point_time" value="$(arg use_first_point_time)"/> 
+    <param name="use_absolute_time" value="$(arg use_absolute_time)"/> 
     <param name="min_range" value="0.15"/>      <!-- 雷达扫描最小距离 小于该值的点将被过滤 -->
     <param name="max_range" value="200.0"/>     <!-- 雷达扫描最大距离 大于该值的点将被过滤 -->
     <param name="angle_disable_min" value="0"/> <!-- 雷达扫描最小裁剪角度 填整数 单位: 0.01° -->
@@ -141,7 +157,11 @@ roslaunch lslidar_driver lslidar_double.launch
 
 - **lidar_type**
 
-  雷达类型，905系列需指定**`具体型号`**，机械式为**`CX`**，1550系列为**`LS`**。
+  雷达类型，单线激光雷达为**`X10`**，机械式激光雷达为**`CX`**，905激光雷达为**`CH`**，1550激光雷达为**`LS`**。
+
+- **lidar_model**
+
+  雷达型号，激光雷达具体型号，如：M10, CX126S3, LSS3, LSS4等。
 
 - **device_ip**
 
@@ -161,6 +181,20 @@ roslaunch lslidar_driver lslidar_double.launch
 
   - true:  使用雷达时间(GPS, NTP, PTP)
   - false: 使用系统时间
+
+- **use_first_point_time**
+
+  点云时间
+
+  - true:  使用每帧第一个点的时间做为点云时间
+  - false: 使用每帧最后一个点的时间做为点云时间
+
+- **use_absolute_time**
+
+  点的时间模式(注意此值要与**`lslidar_pointcloud.hpp`**文件中**`USE_ABSOLUTE_TIME`**保持一致)
+
+  - true:  点的时间使用绝对时间格式
+  - false: 点的时间使用相对时间格式
 
 - **packet_rate**
 
@@ -205,11 +239,29 @@ roslaunch lslidar_driver lslidar_double.launch
   - **`pitch`**:  y 轴旋转   单位: rad
   - **`yaw`**:      z 轴旋转   单位: rad
 
-  
+  Please grant the corresponding serial port permissions.
+
+
 
 ### 特殊参数说明：
 
 #### 以下功能仅对特定系列雷达支持
+
+- **serial_port**
+
+  激光雷达连接的串口名称（例如 `/dev/ttyUSB0` 或 `/dev/ttyACM0`），**使用串口雷达时，请填写正确的串口名称，并确保已授予该串口的读写权限**。
+
+- **use_high_precision**
+
+  高精度模式，laserscan数据启用高精度模式，角度分辨率减小10倍，数据量增加10倍，提高精度。
+
+- **publish_multiecholaserscan**
+
+  N10Plus雷达是否发布`sensor_msgs::MultiEchoLaserScan`数据，此值为true时发布数据。
+
+- **enable_noise_filter**
+
+  孤立噪点滤波开关，此值为true时将过滤孤立点(N10Plus不生效)。
 
 - **pcl_type**
 
@@ -224,7 +276,7 @@ roslaunch lslidar_driver lslidar_double.launch
 
 - **publish_scan**
 
-  发布 `LaserScan` 数据，此值为true时发布 `LaserScan` 数据。
+  发布 `LaserScan` 数据，此值为true时发布数据。
 
 - **scan_num**
 
@@ -233,6 +285,10 @@ roslaunch lslidar_driver lslidar_double.launch
 - **echo_mode**
 
   回波模式，0:发布全部点云  1:发布第一次回波点云  2:发布第二次回波点云(双回波模式下生效)。
+
+- **is_add_frame**
+
+  叠帧发布点云信息，将连续两帧点云数据叠加后一起发布。
 
 - **packet_loss**
 
@@ -279,12 +335,14 @@ roslaunch lslidar_driver lslidar_double.launch
 
 - 驱动发布点云为自定义点云类型，定义参考**`lslidar_driver/include/lslidar_pointcloud.hpp`**
 
+- 如果使用绝对时间，请取消 **`#define USE_ABSOLUTE_TIME`**的注释
+
   ~~~c++
   struct PointXYZIRT {
-      PCL_ADD_POINT4D;     // 坐标 x, y, z
-      PCL_ADD_INTENSITY;   // 强度 intensity
-      std::uint16_t ring;  // 线号
-      float time;          // 时间
+      PCL_ADD_POINT4D;      // x, y, z 和 data[4]
+      PCL_ADD_INTENSITY;    // 强度
+      std::uint16_t ring;   // 线号
+      POINT_TIME_TYPE time; // 时间  POINT_TIME_TYPE -> float/double 
   
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   } EIGEN_ALIGN16;
@@ -316,12 +374,12 @@ roslaunch lslidar_driver lslidar_double.launch
 
 ## 5.雷达功能设置与调控
 
-#### **所有设置功能均可以由ROS服务实现，部分功能只对特定系列雷达支持。**
+#### **部分功能只对特定系列雷达支持。**
 
 ### 设置雷达网络配置：
 
 ~~~bash
-#新开一个终端 cx为命名空间
+# 新开一个终端 cx为命名空间
 source devel/setup.bash
 
 # 使用显示传参配置雷达
@@ -346,7 +404,7 @@ dev_port: 0"
 ### 雷达授时方式：
 
 ~~~bash
-#新开一个终端	cx为命名空间
+# 新开一个终端	cx为命名空间
 source devel/setup.bash
 
 # 0: GPS   1: PTP L2   2: NTP   3: PTP UDPv4   4: E2E L2   5: E2E UDPv4
@@ -365,7 +423,7 @@ ntp_ip: '192.168.1.102'"
 ### 雷达上下电(机械式)：
 
 ~~~bash
-#新开一个终端 cx为命名空间
+# 新开一个终端 cx为命名空间
 source devel/setup.bash
 ~~~
 
@@ -388,7 +446,7 @@ rosservice call /cx/power_control "power_control: 0"
 ### 雷达转动/停止转动(机械式)：
 
 ~~~bash
-#新开一个终端 cx为命名空间
+# 新开一个终端 cx为命名空间
 source devel/setup.bash
 ~~~
 
@@ -411,10 +469,10 @@ rosservice call /cx/motor_control "motor_control: 0"
 ### 雷达转速(机械式 905)：
 
 ~~~bash
-#新开一个终端 cx为命名空间
+# 新开一个终端 cx为命名空间
 source devel/setup.bash
-#可选频率  5Hz/10Hz/20Hz
-rosservice call /cx/motor_speed "motor_speed: 20"	# 5 10 20
+# 可选频率  5Hz/10Hz/20Hz
+rosservice call /cx/motor_speed "motor_speed: 20"	# 5 10 20  (扩展30 40 50 60仅只有CX1S3可设置)
 ~~~
 
 
@@ -424,9 +482,9 @@ rosservice call /cx/motor_speed "motor_speed: 20"	# 5 10 20
 ### 雷达去除雨雾尘等级(机械式)：
 
 ~~~bash
-#新开一个终端 cx为命名空间
+# 新开一个终端 cx为命名空间
 source devel/setup.bash
-#可选等级  0/1/2/3 ，0-3 数字越大，去除越强
+# 可选等级  0/1/2/3 ，0-3 数字越大，去除越强
 rosservice call /cx/remove_rain_fog_dust "rfd_removal: 3"
 ~~~
 
@@ -437,9 +495,9 @@ rosservice call /cx/remove_rain_fog_dust "rfd_removal: 3"
 ### 雷达去拖尾等级(机械式)：
 
 ~~~bash
-#新开一个终端 cx为命名空间
+# 新开一个终端 cx为命名空间
 source devel/setup.bash
-#可选等级 0-10 数字越大，去除越强
+# 可选等级 0-10 数字越大，去除越强
 rosservice call /cx/tail_remove "tail_removal: 4"	#旧版本雷达最大为4
 ~~~
 
@@ -447,10 +505,12 @@ rosservice call /cx/tail_remove "tail_removal: 4"	#旧版本雷达最大为4
 
 
 
-### 雷达角度畸变矫正(1550)：
+### 雷达角度畸变矫正(LSS3)：
+
+**LSS4系列雷达暂无此功能，调用此服务将配置是否发送无效数据**
 
 ~~~bash
-#新开一个终端 ls为命名空间
+# 新开一个终端 ls为命名空间
 source devel/setup.bash
 ~~~
 
@@ -477,7 +537,7 @@ rosservice call /ls/angle_distortion_correction "angle_distortion_correction: 1"
 ### 雷达帧率(1550)：
 
 ~~~bash
-#新开一个终端 ls为命名空间
+# 新开一个终端 ls为命名空间
 source devel/setup.bash
 # 0: 正常帧率    1: 50%帧率    2: 25%帧率
 rosservice call /ls/frame_rate "frame_rate: 1"		# 50%帧率  5hz
@@ -491,8 +551,10 @@ rosservice call /ls/frame_rate "frame_rate: 1"		# 50%帧率  5hz
 
 ### **雷达无效数据发送**(1550)：
 
+**LSS4系列雷达此功能请调用`angle_distortion_correction`服务**
+
 ~~~bash
-#新开一个终端 ls为命名空间
+# 新开一个终端 ls为命名空间
 source devel/setup.bash
 ~~~
 
@@ -517,7 +579,7 @@ rosservice call /ls/invalid_data "invalid_data: 1"
 ### 雷达待机模式(1550)：
 
 ~~~bash
-#新开一个终端 ls为命名空间
+# 新开一个终端 ls为命名空间
 source devel/setup.bash
 ~~~
 
@@ -532,6 +594,32 @@ rosservice call /ls/standby_mode "standby_mode: 0"
 ~~~bash
 rosservice call /ls/standby_mode "standby_mode: 1"
 ~~~
+
+
+
+
+
+### 单线雷达电机控制：
+
+~~~bash
+# N301暂不支持
+# 新开一个终端 x10为命名空间
+source devel/setup.bash
+~~~
+
+转动：
+
+~~~bash
+rostopic pub -1 /x10/motor_control std_msgs/Int8 "data: 1"
+~~~
+
+停转并不发数据：
+
+~~~bash
+rostopic pub -1 /x10/motor_control std_msgs/Int8 "data: 0"
+~~~
+
+
 
 
 
@@ -564,4 +652,86 @@ Modify:
 Date    : 2025-02-24
 
 --------------------------------------------------------------------
+
+
+
+update version : LSLIDAR_ROS_V5.1.0_250324
+
+Modify: 
+
+1. 新增兼容M10, M10GPS, M10P, N10, N301雷达
+1. 新增单线雷达电机控制功能
+1. 新增兼容1550 LSS4系列雷达
+
+Date    : 2025-03-24
+
+--------------------------------------------------------------------
+
+
+
+update version : LSLIDAR_ROS_V5.1.1_250403
+
+Modify: 
+
+1. 新增兼容N10Plus雷达
+1. N10Plus雷达新增MultiEchoLaserScan消息
+1. 新增laserscan高精度模式
+1. 新增点云时间与点时间格式选择
+
+Date    : 2025-04-03
+
+--------------------------------------------------------------------
+
+
+
+update version : LSLIDAR_ROS_V5.1.2_250427
+
+Modify: 
+
+1. 新增兼容 MS32L 雷达
+1. 更新机械式C32 5.0雷达垂直角度
+
+Date    : 2025-04-27
+
+--------------------------------------------------------------------
+
+update version : LSLIDAR_ROS_V5.1.2_250507
+
+Modify: 
+
+1. 新增git 的管理
+
+Date    : 2025-05-07
+
+------
+
+update version : LSLIDAR_ROS_V5.1.3_250704
+
+Modify: 
+
+1. 修改机械式v4.0 PTP授时 时间不正确的问题
+
+Date    : 2025-07-04
+
+------
+
+update version : LSLIDAR_ROS_V5.1.4_250724
+
+Modify: 
+
+1. 增加CH1W雷达型号的兼容
+
+Date    : 2025-07-24
+
+------
+
+update version : LSLIDAR_ROS_V5.1.5_250822
+
+Modify: 
+
+1. 扩展转速设置 (扩展到30 40 50 60仅只有CX1S3可设置)
+
+Date    : 2025-08-22
+
+------
 

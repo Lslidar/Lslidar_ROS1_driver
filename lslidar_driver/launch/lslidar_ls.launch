@@ -1,29 +1,36 @@
 <launch>
+    <arg name="lidar_model" default="LSS3"/>            <!-- 雷达型号: LSS3 LSS4-->
     <arg name="device_ip" default="192.168.1.200"/>     <!-- 雷达ip -->
-    <arg name="msop_port" default="2368"/>              <!--雷达目的数据端口-->
-    <arg name="difop_port" default="2369"/>             <!--雷达目的设备端口-->
-    <arg name="use_time_service" default="false"/>      <!--是否使用授时,false:使用系统时间-->
+    <arg name="msop_port" default="2368"/>              <!-- 雷达目的数据端口-->
+    <arg name="difop_port" default="2369"/>             <!-- 雷达目的设备端口-->
+    <arg name="use_time_service" default="false"/>      <!-- 是否使用授时, false:使用系统时间-->
+    <arg name="use_first_point_time" default="false"/>  <!-- true: 使用每帧第一个点的时间做为点云时间-->
+    <arg name="use_absolute_time" default="false"/>     <!-- 点时间格式 true: 使用绝对时间  注意与点云头文件中USE_ABSOLUTE_TIME保持一致-->
     <arg name="packet_rate" default="15000.0"/>         <!-- PCAP文件回放速率，离线解析pcap包时使用 -->
 
     <node pkg="lslidar_driver" type="lslidar_driver_node" name="lslidar_driver_node" output="screen" ns="ls">
         <!--param name="pcap" value="$(find lslidar_driver)/pcap/xxx.pcap"/-->  <!--离线解析pcap包时取消此行注释-->
         <param name="packet_rate" value="$(arg packet_rate)"/>
-        <param name="lidar_type" value="LS"/>
+        <param name="lidar_type" value="LS"/>           <!-- 雷达类型 -->
+        <param name="lidar_model" value="$(arg lidar_model)"/>
         <param name="device_ip" value="$(arg device_ip)"/>
         <param name="msop_port" value="$(arg msop_port)"/>
         <param name="difop_port" value="$(arg difop_port)"/>
         <param name="use_time_service" value="$(arg use_time_service)"/>
-        <param name="add_multicast" value="false"/>     <!--是否开启组播-->
-        <param name="group_ip" value="224.1.1.2"/>      <!--组播ip-->
-        <param name="frame_id" value="laser_link"/>     <!--点云帧id-->
-        <param name="pointcloud_topic" value="lslidar_point_cloud"/>    <!--点云话题名称-->
-        <param name="min_range" value="0.5"/>           <!--雷达最小探测距离裁剪-->
-        <param name="max_range" value="300"/>           <!--雷达最大探测距离裁剪-->
-        <param name="scan_start_angle" value="-6000"/>    <!--雷达最小探测角度裁剪-->
-    	<param name="scan_end_angle" value="6000"/>       <!--雷达最小探测角度裁剪-->
-        <param name="packet_loss" value="false"/>       <!--是否开启丢包检测-->
-        
-        <param name="is_pretreatment" value="false"/> <!--是否开启预处理-->
+        <param name="add_multicast" value="false"/>     <!-- 是否开启组播-->
+        <param name="group_ip" value="224.1.1.2"/>      <!-- 组播ip-->
+        <param name="frame_id" value="laser_link"/>     <!-- 点云帧id-->
+        <param name="pointcloud_topic" value="lslidar_point_cloud"/>    <!-- 点云话题名称-->
+        <param name="use_first_point_time" value="$(arg use_first_point_time)"/> 
+        <param name="use_absolute_time" value="$(arg use_absolute_time)"/> 
+        <param name="is_add_frame" value="false"/>      <!-- 是否叠帧发布点云信息-->
+        <param name="min_range" value="0.5"/>           <!-- 雷达最小探测距离裁剪-->
+        <param name="max_range" value="2000"/>          <!-- 雷达最大探测距离裁剪-->
+        <param name="scan_start_angle" value="-6000"/>  <!-- 雷达最小探测角度裁剪-->
+    	<param name="scan_end_angle" value="6000"/>     <!-- 雷达最小探测角度裁剪-->
+        <param name="packet_loss" value="false"/>       <!-- 是否开启丢包检测-->
+
+        <param name="is_pretreatment" value="false"/> <!--是否开启预处理 仅对点云生效-->
         <param name="x_offset" value="0.0"/>  <!-- rviz 中表现为围绕红色的 x 轴偏移量 单位: m-->
         <param name="y_offset" value="0.0"/>  <!-- rviz 中表现为围绕绿色的 y 轴偏移量 单位: m-->
         <param name="z_offset" value="0.0"/>  <!-- rviz 中表现为围绕蓝色的 z 轴偏移量 单位: m-->
@@ -32,5 +39,5 @@
         <param name="yaw" value="0.0"/>       <!-- rviz 中表现为围绕蓝色的 z 轴旋转   单位: rad-->
     </node>
 
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find lslidar_driver)/rviz/lslidar_ls.rviz"/> <!-- 注释此行不启动RViz -->
+    <node name="rviz_LS" pkg="rviz" type="rviz" args="-d $(find lslidar_driver)/rviz/lslidar_ls.rviz"/> <!-- 注释此行不启动RViz -->
 </launch>

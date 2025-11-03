@@ -39,6 +39,7 @@ namespace lslidar_driver {
         private_nh.param("device_ip", devip_str_, std::string(""));
         private_nh.param<bool>("add_multicast", add_multicast, false);
         private_nh.param<std::string>("group_ip", group_ip, "224.1.1.2");
+        private_nh.param<int>("difop_port", difop_port_, 2369);
         // if (!devip_str_.empty())
         //     ROS_INFO_STREAM("Only accepting packets from IP address: " << devip_str_);
     }
@@ -124,17 +125,13 @@ namespace lslidar_driver {
 
         if (retval > 0 && (fds[0].revents & POLLIN)) {
             ssize_t nbytes = recvfrom(sockfd_, &pkt->data[0], packet_size_, 0, (sockaddr *) &sender_address, &sender_address_len);
-
-            if (nbytes == packet_size_ || nbytes == 1206) {
-                if (sender_address.sin_addr.s_addr == devip_.s_addr) {
-                    return 0; // 成功接收完整数据包
-                } else {
-                    // IP 地址不一致
-                    ROS_WARN_THROTTLE(2, "lidar IP parameter mismatch. Received IP: %s. Please reset lidar IP in the launch file.", inet_ntoa(sender_address.sin_addr));
-                    return 1;
-                }
+            
+            if (sender_address.sin_addr.s_addr == devip_.s_addr) {
+                return nbytes;
             } else {
-                return 1;
+                // IP 地址不一致
+                ROS_WARN_THROTTLE(2, "lidar IP parameter mismatch. Received IP: %s. Please reset lidar IP in the launch file.", inet_ntoa(sender_address.sin_addr));
+                return 0;
             }
         } else {
             if (retval == 0) {  
@@ -144,7 +141,7 @@ namespace lslidar_driver {
                 sprintf(bufTime, "%d-%d-%d %d:%d:%d", curTm->tm_year + 1900, curTm->tm_mon + 1,
                         curTm->tm_mday, curTm->tm_hour, curTm->tm_min, curTm->tm_sec);
                 ROS_WARN("%s  lslidar poll() timeout, port:%d", bufTime, port_);
-                return 1; // 超时返回
+                return 0; // 超时返回
             }
 
             if (retval < 0) { 
@@ -160,7 +157,29 @@ namespace lslidar_driver {
             }
         }
 
-        return 1;
+        return 0;
+    }
+
+    void InputSocket::sendPacket(const unsigned char *data, size_t length) {
+        if (data == nullptr || length <= 0) {
+            ROS_ERROR("Invalid input data or length.");
+            return;
+        }
+
+        sockaddr_in server_sai;
+        server_sai.sin_family = AF_INET;
+        server_sai.sin_port = htons(difop_port_);
+        server_sai.sin_addr.s_addr = inet_addr(devip_str_.c_str());
+
+        ssize_t nbytes = sendto(sockfd_, data, length, 0, (struct sockaddr *)&server_sai, sizeof(server_sai));
+
+        if (nbytes < 0) {
+            ROS_ERROR("Data packet sending failed: %s", strerror(errno));
+        } else if (nbytes != length) {
+            ROS_WARN("Partial data sent: %zd/%zd bytes", nbytes, length);
+        } else {
+            ROS_INFO("Successfully sent %zd bytes!", nbytes);
+        }
     }
 
 
@@ -245,7 +264,7 @@ namespace lslidar_driver {
                 pkt->stamp = ros::Time::now();  // time_offset not considered here, as no
                 // synchronization required
                 empty_ = false;
-                return 0;  // success
+                return packet_size_;  // success
             }
 
             if (empty_)  // no data in file?
@@ -264,7 +283,7 @@ namespace lslidar_driver {
                 usleep(rint(repeat_delay_ * 1000000.0));
             }
 
-            ROS_DEBUG("replaying lslidar dump file");
+            ROS_INFO("Replaying lslidar dump file");
 
             // I can't figure out how to rewind the file, because it
             // starts with some kind of header.  So, close the file
@@ -279,6 +298,10 @@ namespace lslidar_driver {
         }
 
         return 0;
+    }
+
+    void InputPCAP::sendPacket(const unsigned char *data, size_t length) {
+        ROS_INFO("Offline settings are not currently supported.");
     }
 
 } //namespace

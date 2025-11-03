@@ -23,9 +23,6 @@
 
 #include <cmath>
 #include <unordered_map>
-#include <functional>
-#include <sensor_msgs/LaserScan.h>
-#include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 
 namespace lslidar_driver {
@@ -34,9 +31,9 @@ namespace lslidar_driver {
 
     constexpr double CH_DISTANCE_RESOLUTION = 0.0000390625;
     constexpr double sqrt_0_5 = std::sqrt(0.5);
-    constexpr double pow1 = -3.6636 * pow(10, -7);
-    constexpr double pow2 = 5.2766 * pow(10, -5);
-    constexpr double pow3 = 1.4507 * pow(10, -4);
+    constexpr double pow1 = -0.00000036636;
+    constexpr double pow2 = 0.000052766;
+    constexpr double pow3 = 0.00014507;
     
     constexpr double big_angle[32]={-17,-16,-15,-14,-13,-12,-11,-10,
                                     -9,-8,-7,-6,-5,-4.125,-4,-3.125,
@@ -76,7 +73,7 @@ namespace lslidar_driver {
         int azimuth;
         double distance;
         float intensity;
-        float time;
+        double time;
     };
 
     class LslidarChDriver : public LslidarDriver {
@@ -157,17 +154,14 @@ namespace lslidar_driver {
     private:
         int echo_byte = 1211;
 
-        std::string lidar_type;
-        in_addr lidar_ip;
-
         double prism_angle[4];
         double sin_list[36000]{};
         double cos_list[36000]{};
 
         pcl::PointCloud<PointXYZIRT>::Ptr point_cloud_xyzirt_;
         pcl::PointCloud<PointXYZIRT>::Ptr point_cloud_xyzirt_bak_;
-        sensor_msgs::LaserScan::Ptr scan_msg;
-        sensor_msgs::LaserScan::Ptr scan_msg_bak;
+        sensor_msgs::LaserScan::Ptr scan_msg_;
+        sensor_msgs::LaserScan::Ptr scan_msg_bak_;
 
         uint point_size;
         double prism_offset;
@@ -190,7 +184,6 @@ namespace lslidar_driver {
         bool publish_laserscan;
         bool gain_prism_angle;
         bool add_multicast;
-        bool packetType;
 
         uint32_t packet_timestamp_s;
         uint32_t packet_timestamp_ns;

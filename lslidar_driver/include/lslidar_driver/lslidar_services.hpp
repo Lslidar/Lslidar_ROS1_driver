@@ -29,6 +29,7 @@
 #include <regex>
 #include <cstdio>
 #include <string>
+#include <mutex>
 #include <yaml-cpp/yaml.h>
 #include <ros/ros.h>
 #include <ros/package.h>
@@ -100,10 +101,10 @@ namespace lslidar_driver {
                                      lslidar_msgs::TimeMode::Response &res);
 
     protected:
-        std::mutex difop_data_mutex;
-        std::atomic<bool> difop_valid{false};
+        std::mutex difop_data_mutex_;
+        std::atomic<bool> difop_valid_{false};
         unsigned char difop_data[1206];
-        std::string lslidar_ip;
+        std::string lslidar_ip_;
 
         NetConfig LiDAR;
     };

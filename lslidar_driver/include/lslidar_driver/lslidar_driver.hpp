@@ -26,8 +26,12 @@
 #include <string>
 #include <memory>
 #include <atomic>
+#include <limits>
+#include <functional>
 #include <std_msgs/Float64.h>
+#include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include "input.hpp"
 #include "ThreadPool.h"
@@ -60,16 +64,16 @@ namespace lslidar_driver {
         ros::NodeHandle nh_;
         ros::NodeHandle private_nh_;
 
-        ros::Publisher pointcloud_pub;
-        ros::Publisher laserscan_pub;
-        ros::Publisher lidar_info_pub;
-        ros::Publisher time_pub;
+        ros::Publisher pointcloud_pub_;
+        ros::Publisher laserscan_pub_;
+        ros::Publisher lidar_info_pub_;
+        ros::Publisher time_pub_;
         
-        ros::ServiceServer network_config_service;
-        ros::ServiceServer motor_speed_service;
-        ros::ServiceServer time_mode_service;
+        ros::ServiceServer network_config_service_;
+        ros::ServiceServer motor_speed_service_;
+        ros::ServiceServer time_mode_service_;
         
-        lslidar_msgs::LslidarInformationPtr lidar_info_data;
+        lslidar_msgs::LslidarInformationPtr lidar_info_data_;
         PointCloudTransform pointcloud_transform_;
 
         std::shared_ptr<Input> msop_input_;
@@ -80,19 +84,26 @@ namespace lslidar_driver {
 
         std::atomic<bool> is_get_difop_{false};
 
+        std::string lidar_model;
         std::string lidar_ip_string;
         std::string group_ip_string;
         std::string dump_file;
         std::string frame_id;
-        std::string pointcloud_topic;
+        std::string pointcloud_topic_;
         
         bool add_multicast;
         bool use_time_service;
+        bool use_first_point_time;
+        bool use_absolute_time;
         bool is_pretreatment;
 
         int msop_udp_port;
         int difop_udp_port;
+        int point_time_offset;
+        int relative_time_offset;
 
+        double point_cloud_time;
+        double last_point_cloud_time = 0.0;
         double packet_rate;
         double min_range;
         double max_range;
