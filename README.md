@@ -1,7 +1,7 @@
-# LSLIDAR_ROS_V5.1.5_250822 使用说明
+# LSLIDAR_ROS_V5.1.5_250922 使用说明
 
 ## 1.工程介绍
-​		LSLIDAR_ROS_V5.1.5_250822为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
+​		LSLIDAR_ROS_V5.1.5_250922为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
 
 #### 1.1 支持的雷达型号
 
@@ -725,13 +725,16 @@ Date    : 2025-07-24
 
 ------
 
-update version : LSLIDAR_ROS_V5.1.5_250822
+update version : LSLIDAR_ROS_V5.1.5_250922
 
 Modify: 
 
 1. 扩展转速设置 (扩展到30 40 50 60仅只有CX1S3可设置)
+1. CX1S3修改使用laserscan 点云跳动不正确的问题
+1. 修改CH类型，laserscan初始化范围为 launch文件设置的角度;
+1. 修改 CX128S2, 字符串写错CX128s2的问题
 
-Date    : 2025-08-22
+Date    : 2025-09-22
 
 ------
 

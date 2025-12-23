@@ -1,7 +1,7 @@
-## Instruction Manual for LSLIDAR_ROS_V5.1.5_250822
+## Instruction Manual for LSLIDAR_ROS_V5.1.5_250922
 
 ### 1.Project Introduction
-​		LSLIDAR_ROS_V5.1.5_250822 is a ROS driver for LiDAR in the Linux  environment. The program has been tested and proven compatible with  Ubuntu 20.04 running ROS Noetic, Ubuntu 18.04 with ROS Melodic, and  Ubuntu 16.04 using ROS Kinetic.
+​		LSLIDAR_ROS_V5.1.5_250922 is a ROS driver for LiDAR in the Linux  environment. The program has been tested and proven compatible with  Ubuntu 20.04 running ROS Noetic, Ubuntu 18.04 with ROS Melodic, and  Ubuntu 16.04 using ROS Kinetic.
 
 #### 1.1  Supported Lidar Models
 
@@ -720,10 +720,13 @@ Date    : 2025-07-24
 
 ------
 
-update version : LSLIDAR_ROS_V5.1.5_250822
+update version : LSLIDAR_ROS_V5.1.5_250922
 
 Modify: 
 
 1. Extended speed setting (extended to 30, 40, 50, 60, only available for CX1S3)
+1. CX1S3 fixes the issue of incorrect point cloud jitter when using laserscan
+1. Modify the CH type to set the Laserscan initialization range to the angle set in the launch file;
+1. Modify CX128S2, string writing error CX128s2 issue
 
-Date    : 2025-08-22
+Date    : 2025-09-22

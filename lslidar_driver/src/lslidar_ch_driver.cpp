@@ -84,7 +84,7 @@ namespace lslidar_driver {
                                                 std::dynamic_pointer_cast<LslidarChServices>(services_).get());
 
         if (dump_file != "") {
-            if (lidar_model == "CH128S1" || lidar_model == "CH16X1" || lidar_model == "CX128s2" ||
+            if (lidar_model == "CH128S1" || lidar_model == "CH16X1" || lidar_model == "CX128S2" ||
                 lidar_model == "CX126S3" || lidar_model == "CX6S3" || lidar_model == "CH256" || lidar_model == "CX1S3") {
                 msop_input_.reset(new lslidar_driver::InputPCAP(pnh, msop_udp_port, 1212, packet_rate, dump_file));
                 difop_input_.reset(new lslidar_driver::InputPCAP(pnh, difop_udp_port, 1206, 1, dump_file));
@@ -94,7 +94,7 @@ namespace lslidar_driver {
                 echo_byte = 1205;
             }
         } else {
-            if (lidar_model == "CH128S1" || lidar_model == "CH16X1" || lidar_model == "CX128s2" ||
+            if (lidar_model == "CH128S1" || lidar_model == "CH16X1" || lidar_model == "CX128S2" ||
                 lidar_model == "CX126S3" || lidar_model == "CX6S3" || lidar_model == "CH256" || lidar_model == "CX1S3") {
                 msop_input_.reset(new lslidar_driver::InputSocket(pnh, msop_udp_port, 1212));
                 difop_input_.reset(new lslidar_driver::InputSocket(pnh, difop_udp_port, 1206));
@@ -281,8 +281,8 @@ namespace lslidar_driver {
         point_cloud_xyzirt_->height = 1;
 
         if (publish_laserscan) {
-            scan_msg_->angle_min = -M_PI;
-            scan_msg_->angle_max = M_PI;
+            scan_msg_->angle_min = scan_start_angle * 0.01 * DEG_TO_RAD;
+            scan_msg_->angle_max = scan_end_angle * 0.01 * DEG_TO_RAD;
             scan_msg_->range_min = min_range;
             scan_msg_->range_max = max_range;
             scan_msg_->angle_increment = horizontal_angle_resolution * DEG_TO_RAD;
@@ -717,8 +717,8 @@ namespace lslidar_driver {
 
                 if (publish_laserscan) {
                     scan_msg_.reset(new sensor_msgs::LaserScan());
-                    scan_msg_->angle_min = -M_PI;
-                    scan_msg_->angle_max = M_PI;
+                    scan_msg_->angle_min = scan_start_angle * 0.01 * DEG_TO_RAD;
+                    scan_msg_->angle_max = scan_end_angle * 0.01 * DEG_TO_RAD;
                     scan_msg_->range_min = min_range;
                     scan_msg_->range_max = max_range;
                     scan_msg_->angle_increment = horizontal_angle_resolution * DEG_TO_RAD;
@@ -811,8 +811,8 @@ namespace lslidar_driver {
 
                 if (publish_laserscan) {
                     scan_msg_.reset(new sensor_msgs::LaserScan());
-                    scan_msg_->angle_min = -M_PI;
-                    scan_msg_->angle_max = M_PI;
+                    scan_msg_->angle_min = scan_start_angle * 0.01 * DEG_TO_RAD;
+                    scan_msg_->angle_max = scan_end_angle * 0.01 * DEG_TO_RAD;
                     scan_msg_->range_min = min_range;
                     scan_msg_->range_max = max_range;
                     scan_msg_->angle_increment = horizontal_angle_resolution * DEG_TO_RAD;
@@ -882,7 +882,8 @@ namespace lslidar_driver {
 
         // laserscan
         if (publish_laserscan) {
-            if (channel_num == lidardata.vertical_line) {
+            //if (channel_num == lidardata.vertical_line) 
+            {
                 updateLaserscan(x, y, lidardata.intensity);
             }
         }
