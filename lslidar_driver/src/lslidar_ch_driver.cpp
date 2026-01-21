@@ -130,9 +130,19 @@ namespace lslidar_driver {
         }
 
         // CH32A
-        for (int i = 0; i < 8; ++i) {
-            sin_scan_laser_altitude[i] = sin(scan_laser_altitude_1[i] * DEG_TO_RAD);
+        if(lidar_model == "CH32G")
+        {
+            for (int i = 0; i < 8; ++i) {
+                sin_scan_laser_altitude[i] = sin(scan_laser_altitude_CH32G[i] * DEG_TO_RAD);
+            }
         }
+        else
+        {
+            for (int i = 0; i < 8; ++i) {
+                sin_scan_laser_altitude[i] = sin(scan_laser_altitude_CH32A[i] * DEG_TO_RAD);
+            }
+        }
+
 
         //ch256
         for (int k1 = 0; k1 < 256; ++k1) {
@@ -258,6 +268,7 @@ namespace lslidar_driver {
         coordinateConverters["CX6S3"]    = [this](Firing &data){ convertCoordinate_cx6s3(data); };
         coordinateConverters["CH16X1"]   = [this](Firing &data){ convertCoordinate_ch16x1(data); };
         coordinateConverters["CH32A"]    = [this](Firing &data){ convertCoordinate_ch32a(data); };
+        coordinateConverters["CH32G"]    = [this](Firing &data){ convertCoordinate_ch32a(data); };
         coordinateConverters["CH1W"]     = [this](Firing &data){ convertCoordinate_ch64w(data); };
         coordinateConverters["CH64W"]    = [this](Firing &data){ convertCoordinate_ch64w(data); };
         coordinateConverters["CB64S1_A"] = [this](Firing &data){ convertCoordinate_cb64s1_a(data); };
@@ -562,7 +573,10 @@ namespace lslidar_driver {
                         gain_prism_angle = false;
                     }
 
-                    if ("CH32A" == lidar_model) {
+                    if ("CH32A" == lidar_model || "CH32G" == lidar_model ) {
+                        this->packetTimeStamp[4] = difop_packet->data[41];
+                        this->packetTimeStamp[5] = difop_packet->data[40];
+                        this->packetTimeStamp[6] = difop_packet->data[39];
                         this->packetTimeStamp[7] = difop_packet->data[38];
                         this->packetTimeStamp[8] = difop_packet->data[37];
                         this->packetTimeStamp[9] = difop_packet->data[36];
@@ -570,10 +584,14 @@ namespace lslidar_driver {
 
                     if ("CH128X1" == lidar_model || "CH1W" == lidar_model || "CH64W" == lidar_model || "CB64S1_A" == lidar_model) {
                         if (difop_packet->data[176] == 0x00) {
+                            this->packetTimeStamp[4] = difop_packet->data[57];
+                            this->packetTimeStamp[5] = difop_packet->data[56];
+                            this->packetTimeStamp[6] = difop_packet->data[55];
                             this->packetTimeStamp[7] = difop_packet->data[54];
                             this->packetTimeStamp[8] = difop_packet->data[53];
                             this->packetTimeStamp[9] = difop_packet->data[52];
                         } else if (difop_packet->data[176] == 0x01) {
+                            this->packetTimeStamp[4] = difop_packet->data[57];
                             this->packetTimeStamp[5] = difop_packet->data[56];
                             this->packetTimeStamp[6] = difop_packet->data[55];
                             this->packetTimeStamp[7] = difop_packet->data[54];
@@ -600,7 +618,7 @@ namespace lslidar_driver {
         }
 
         if (use_time_service) {
-            if ("CH128X1" == lidar_model || "CH1W" == lidar_model || "CH64W" == lidar_model || "CB64S1_A" == lidar_model || "CH32A" == lidar_model) {
+            if ("CH128X1" == lidar_model || "CH1W" == lidar_model || "CH64W" == lidar_model || "CB64S1_A" == lidar_model || "CH32A" == lidar_model|| "CH32G" == lidar_model) {
                 if (packet_->data[1205] == 0x01) {
                     this->packetTimeStamp[4] = packet_->data[1199];
                     this->packetTimeStamp[5] = packet_->data[1198];

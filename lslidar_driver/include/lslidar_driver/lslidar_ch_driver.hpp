@@ -54,7 +54,10 @@ namespace lslidar_driver {
                                               6.6,7.2,7.8,8.4,9.0,9.6,10.2,10.8,11.4,12.0,12.6};
 
     // CH32A
-    constexpr double scan_laser_altitude_1[8] = {-6.67, -5.33, -4, -2.67, -1.33, 0, 1.33, 2.67};
+    constexpr double scan_laser_altitude_CH32A[8] = {-6.67, -5.33, -4, -2.67, -1.33, 0, 1.33, 2.67};
+
+    // CH32G
+    constexpr double scan_laser_altitude_CH32G[8] = {-14.0, -11.0, -8.0, -5.0, -2.0, 0.0, 2.0, 5.0};
 
     constexpr double scan_mirror_altitude[4] = {
             -0.0,

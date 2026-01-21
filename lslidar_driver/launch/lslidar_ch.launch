@@ -1,5 +1,5 @@
 <launch>
-    <arg name="lidar_model" default="CX1S3"/>       	<!--雷达型号: CX1S3 CX6S3 CH16X1 CH32A CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256 CH1W-->
+    <arg name="lidar_model" default="CX1S3"/>       	<!--雷达型号: CX1S3 CX6S3 CH16X1 CH32A CH32G CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256 CH1W-->
     <arg name="device_ip" default="192.168.1.200"/>   <!-- 雷达ip -->
     <arg name="msop_port" default="2368"/>            <!--雷达目的数据端口-->
     <arg name="difop_port" default="2369"/>           <!--雷达目的设备端口-->

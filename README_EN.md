@@ -1,7 +1,7 @@
-## Instruction Manual for LSLIDAR_ROS_V5.1.5_250922
+## Instruction Manual for LSLIDAR_ROS_V5.1.6_20260116
 
 ### 1.Project Introduction
-​		LSLIDAR_ROS_V5.1.5_250922 is a ROS driver for LiDAR in the Linux  environment. The program has been tested and proven compatible with  Ubuntu 20.04 running ROS Noetic, Ubuntu 18.04 with ROS Melodic, and  Ubuntu 16.04 using ROS Kinetic.
+​		LSLIDAR_ROS_V5.1.6_20260116 is a ROS driver for LiDAR in the Linux  environment. The program has been tested and proven compatible with  Ubuntu 20.04 running ROS Noetic, Ubuntu 18.04 with ROS Melodic, and  Ubuntu 16.04 using ROS Kinetic.
 
 #### 1.1  Supported Lidar Models
 
@@ -20,7 +20,7 @@ MSC16 MS32L
 
 ~~~elixir
 # 905 Hybrid Solid-State Lidars
-CX1S3 CX6S3 CH16X1 CH32A CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256 CH1W
+CX1S3 CX6S3 CH16X1 CH32A CH32G CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256 CH1W
 ~~~
 
 ```apl
@@ -730,3 +730,21 @@ Modify:
 1. Modify CX128S2, string writing error CX128s2 issue
 
 Date    : 2025-09-22
+
+------
+
+
+
+------
+
+update version : LSLIDAR_ROS_V5.1.6_20260116
+
+Modify: 
+
+1. Enhance CH driver compatibility for CH32G
+1. Enhance the compatibility of LS drivers with MS06
+
+Date    : 2026-01-16
+
+------
+

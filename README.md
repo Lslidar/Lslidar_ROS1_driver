@@ -1,7 +1,7 @@
-# LSLIDAR_ROS_V5.1.5_250922 使用说明
+# LSLIDAR_ROS_V5.1.6_20260116 使用说明
 
 ## 1.工程介绍
-​		LSLIDAR_ROS_V5.1.5_250922为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
+​		LSLIDAR_ROS_V5.1.6_20260116为linux环境下雷达ros驱动，程序在ubuntu 20.04 ros noetic,ubuntu18.04 ros melodic以及ubuntu16.04 ros kinetic下测试通过。
 
 #### 1.1 支持的雷达型号
 
@@ -20,7 +20,7 @@ MSC16 MS32L(5.0)
 
 ~~~elixir
 # 905混合固态激光雷达
-CX1S3 CX6S3 CH16X1 CH32A CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256 CH1W
+CX1S3 CX6S3 CH16X1 CH32A CH32G CH64W CB64S1_A CX126S3 CH128X1 CH128S1 CX128S2 CH256 CH1W
 ~~~
 
 ```apl
@@ -735,6 +735,17 @@ Modify:
 1. 修改 CX128S2, 字符串写错CX128s2的问题
 
 Date    : 2025-09-22
+
+------
+
+update version : LSLIDAR_ROS_V5.1.6_20260122
+
+Modify: 
+
+1. 增加CH驱动CH32G的兼容
+1. 增加LS驱动对 MS06的兼容
+
+Date    : 2026-01-16
 
 ------
 
